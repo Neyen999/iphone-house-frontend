@@ -46,3 +46,7 @@ export const checkBackendStatus = async () => {
     // do something to show on the front end
   }
 } 
+
+export const obtainCookie = async (cookieName: string) => {
+  cookies().get(cookieName);
+}

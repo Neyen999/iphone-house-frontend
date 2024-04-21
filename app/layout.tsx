@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 // import TokenExpiredModal from "./components/tokenExpired";
 import { TokenExpiredModalWrapper } from "./components/sessionManager";
+import ContextProvider from "./context/contextProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,8 +17,10 @@ export default function RootLayout({ children, }: Readonly<{ children: React.Rea
   return (
     <html lang="en">
       <body className={inter.className}>
-        {children}
-        <TokenExpiredModalWrapper />
+        <ContextProvider>
+          {children}
+          <TokenExpiredModalWrapper />
+        </ContextProvider>
         {/* <TokenExpiredModal /> */}
       </body>
     </html>

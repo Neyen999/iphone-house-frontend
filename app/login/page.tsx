@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { loginUser } from '@/lib/auth.service';
+import { getLoggedUser, loginUser } from '@/lib/auth.service';
 
 const Login = () => {
   const router = useRouter();
@@ -22,6 +22,8 @@ const Login = () => {
     try {
       await loginUser(request);
       setLoginStatus('success');
+
+      const loggedUser = await getLoggedUser();
 
       // Simulate a delay of 1 second before redirecting
       setTimeout(() => {
