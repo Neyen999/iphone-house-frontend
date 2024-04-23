@@ -15,15 +15,26 @@ export default async function middleware(req: NextRequest) {
   const isAuth = await isAuthenticated();
   const isValid = await isTokenValid();
 
-  if (!isAuth || !isValid) {
+  if (!isAuth && !isValid) {
+    console.log("direct to login");
     url.pathname = '/login';
     return NextResponse.redirect(url);
   }
 
+  if (isAuth && !isValid) {
+    console.log("redirect to null");
+    return null;
+  }
+
   // validate roles
-  // if (req.cookies.get("userRole") !== null) {
-  //   // const { roles } = req.cookies.get("user")?.value
-  // }
+  if (req.cookies.get("userRole") !== null) {
+    const role = req.cookies.get("userRole")?.value;
+    if (role === "ADMIN") {
+      url.pathname = '/administracion';
+      return NextResponse.redirect(url);
+    }
+    // const { roles } = req.cookies.get("user")?.value
+  }
 
   // req.
 

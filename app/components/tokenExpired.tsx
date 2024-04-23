@@ -1,64 +1,37 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 // import { isAuthenticated, isTokenValid } from '@/lib/auth.server';
-import { logoutUser } from '@/lib/auth.service';
+// import { logoutUser } from '@/lib/auth.service';
+import { useAuth } from '../context/context';
 import clsx from 'clsx';
 
-const TokenExpiredModal = ({ isTokenExpired } :any) => {
-  const router = useRouter();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  // const [isTokenExpired, setIsTokenExpired] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const TokenExpiredModal = ({ initialIsTokenExpired } :any) => {
+  const { 
+          isTokenExpired, setIsTokenExpired, 
+          isLoggingOut, isModalOpen, handleLogout, 
+          handleModalClose, checkTokenExpiration 
+        } = useAuth();
 
-  console.log("ESTA EXPIRADO?: ", isTokenExpired)
-
-  // useEffect(() => {
-    // checkTokenExpiration();
-    // Check token expiration every minute
-    // const interval = setInterval(checkTokenExpiration, 60000);
-
-    // Clean up the interval on component unmount
-    // return () => clearInterval(interval);
-  // }, []);
-
-  // const checkTokenExpiration = async () => {
-  //   const isAuth = await isAuthenticated();
-  //   const isValid = await isTokenValid();
-  //   console.log("ES AUTH ON USE EFFECT: ", isAuth);
-  //   console.log("ES VALID ON USE EFFECT: ", isValid);
-  //   setIsTokenExpired(isAuth && !isValid);
-  // };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setIsLoggingOut(false);
-  };
+  // console.log("ESTA EXPIRADO?: ", isTokenExpired);
 
   useEffect(() => {
-    if (isTokenExpired) {
-      console.log("INSIDE THE IS EXPIRED IF");
-      setIsModalOpen(true);
-    }
-  }, [isTokenExpired]);
+    setIsTokenExpired(initialIsTokenExpired);
+    const interval = setInterval(checkTokenExpiration, 60000); // Check every minute
 
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-    // Perform logout logic here, such as deleting the token cookie and clearing user data
+    // Clean up the interval on component unmount
+    return () => clearInterval(interval);
+  }, []);
 
-    // Redirect to the login page after logout
-    // deleteTokenCookie()
-    logoutUser();
-    router.push('/login');
+  const logoutAndCloseModal = () => {
+    handleLogout();
     handleModalClose();
-  };
+  }
 
   const handleExtendSession = async () => {
     // Perform session extension logic here, such as refreshing the token
-    // You may need to make a request to your backend to renew the token
 
-    // Close the modal after session extension
     handleModalClose();
   };
 
@@ -80,7 +53,7 @@ const TokenExpiredModal = ({ isTokenExpired } :any) => {
         <h2 className="text-2xl font-bold mb-4">Your session has expired</h2>
         <div className="flex justify-end space-x-4">
           <button
-            onClick={handleLogout}
+            onClick={logoutAndCloseModal}
             disabled={isLoggingOut}
             className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 disabled:opacity-50"
           >

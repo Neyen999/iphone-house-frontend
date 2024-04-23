@@ -4,17 +4,6 @@ import TokenExpiredModal from './tokenExpired';
 // import { useState, useEffect } from 'react';
 
 export const TokenExpiredModalWrapper = async () => {
-  // const [isTokenExpired, setIsTokenExpired] = useState(false);
-
-  // useEffect(() => {
-  //   checkTokenExpiration();
-
-  //   // Check token expiration every minute
-  //   const interval = setInterval(checkTokenExpiration, 60000);
-
-  //   // Clean up the interval on component unmount
-  //   return () => clearInterval(interval);
-  // }, []);
 
   const checkTokenExpiration = async () => {
     "use server";
@@ -27,7 +16,7 @@ export const TokenExpiredModalWrapper = async () => {
   };
 
   let result = await checkTokenExpiration();
-  return <TokenExpiredModal isTokenExpired={result} />;
+  return <TokenExpiredModal initialIsTokenExpired={result} />;
 };
 
 // export default TokenExpiredModalWrapper;

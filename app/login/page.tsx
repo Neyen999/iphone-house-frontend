@@ -27,7 +27,7 @@ const Login = () => {
 
       // Simulate a delay of 1 second before redirecting
       setTimeout(() => {
-        router.push('/');
+        router.push('/inicio');
       }, 1000);
       // router.push('/')
     } catch (error) {

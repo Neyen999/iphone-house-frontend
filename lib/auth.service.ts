@@ -21,15 +21,6 @@ export const loginUser = async (credentials: LoginRequest): Promise<string> => {
 
     createSessionToken("session", response.data.token, expirationDate);
 
-
-    // const cuk = cookies().get('token');
-    // const jsonResponse = Response.json({
-    //   token: response.data,
-    //   status: response.status
-    // }) 
-
-    // console.log("RESPUESTA JSON: ", jsonResponse)
-
     return response.data; 
     //return response.data;
   } catch (error) {
@@ -45,19 +36,29 @@ export const logoutUser = () => {
 export const getLoggedUser = async (): Promise<UserDTO> => {
   const token = await obtainCookie("session");
 
+  console.log("Token de la cookie en getLoggedUser: ", token);
+
+  const axiosHeaders = {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
+
+  const plainHeaders = Object.fromEntries(Object.entries(axiosHeaders));
+
   const response = await axios.get(`${API_BASE_URL}/user/loggedUser`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
+    headers: plainHeaders
   })
+
+  const userData : UserDTO = response.data;
 
   const expirationDate = new Date();
   expirationDate.setDate(expirationDate.getDate() + 7); // Adding 7 days
 
+  console.log("USER DATA: ", userData);
   // const userRole = .roles.map((role) => role.name).join(',');
-  createSessionToken("userRole", response, expirationDate)
+  createSessionToken("userRole", userData.roles[0].name, expirationDate)
 
-  console.log(response.data);
+  console.log("LOGGED USER RESPONSE: ", response.data);
   return response.data;
 }
 

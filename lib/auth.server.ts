@@ -2,6 +2,7 @@
 'use server';
 import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
+import { jwtDecode } from "jwt-decode";
 
 export const isAuthenticated = async () => {
   const token = cookies().get('session')?.value;
@@ -12,23 +13,32 @@ export const isAuthenticated = async () => {
 export const isTokenValid = async () => {
   const token = cookies().get('session')?.value;
 
-  const request = { token: token};
+  let decoded = null
+  console.log("VALOR DEL TOKEN: ", token)
 
-  if (token !== null && token !== undefined) {
-    const response = await fetch(`http://localhost:8080/api/v1/auth/validateJwt`, {
-    body: JSON.stringify(request),
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    }
-    });
-    if (response.status === 401) {
-      return false;
-    }
-    const result = await response.json();
+  if (token !== undefined && token !== "" && token !== null) {
+    console.log("On invalid token")
+    decoded = jwtDecode(token);
+    const expiration = decoded.exp || 0;
 
-    return result;
+    console.log(expiration);
+    // compare to current date and hour
+    const now = Date.now();
+
+    // Convert expiration time and current time to human-readable date formats
+    const expirationDate = new Date(expiration * 1000).toLocaleString();
+    const currentDate = new Date(now).toLocaleString();
+
+    console.log("Token expiration time:", expirationDate);
+    console.log("Current time:", currentDate);
+
+
+    console.log("Is token valid?: ", now < (expiration * 1000))
+    return now < (expiration * 1000);
   }
+
+  console.log("Decoded JWT: ", decoded);
+
   return false;
 }
 
@@ -48,5 +58,5 @@ export const checkBackendStatus = async () => {
 } 
 
 export const obtainCookie = async (cookieName: string) => {
-  cookies().get(cookieName);
+  return cookies().get(cookieName)?.value;
 }
