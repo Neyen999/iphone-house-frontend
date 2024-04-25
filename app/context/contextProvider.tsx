@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Context from "./context";
 import { logoutUser } from "@/lib/auth.service";
-import { checkTokenExpiration } from "@/lib/auth.server";
+import { checkTokenExpiration, obtainCookie } from "@/lib/auth.server";
 
 const ContextProvider = ({ children }: any) => {
   const router = useRouter();
@@ -13,10 +13,30 @@ const ContextProvider = ({ children }: any) => {
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
+  useEffect(() => {
+    console.log("Context provider render");
+
+    const handleUser = async () => {
+      const userFromCookie = await obtainCookie("userData");
+      if (userFromCookie !== undefined) {
+        console.log("USER FROM COOKIE: ", userFromCookie)
+        const parsedUser = JSON.parse(userFromCookie);
+        // updateUser(parsedUser);
+        setUser(parsedUser);
+      }
+    }
+    handleUser();
+  }, []);
+
+  // useEffect(() => {
+  //   console.log("USER AFTER USE EFFECT: ", user);
+  // }, [])
 
   const updateUser = (newUser: UserDTO) => {
+    console.log("NEW USER VALUE: ", newUser);
     setUser(newUser);
   }
+
 
   const handleModalClose = () => {
     console.log("Handle modal close on context provider")
@@ -36,7 +56,7 @@ const ContextProvider = ({ children }: any) => {
 
   const contextValue: ContextValue = {
     user,
-    updateUser,
+    setUser,
     isTokenExpired,
     isLoggingOut,
     isModalOpen,

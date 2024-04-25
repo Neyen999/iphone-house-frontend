@@ -1,6 +1,6 @@
 interface ContextValue {
   user: UserDTO | null;
-  updateUser: (newUser: UserDTO) => void;
+  setUser: (value: UserDTO) => void;
   isTokenExpired: boolean;
   isLoggingOut: boolean;
   isModalOpen: boolean;
