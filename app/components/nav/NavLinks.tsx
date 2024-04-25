@@ -14,10 +14,10 @@ const links = [
   { name: 'Inicio', href: '/inicio', icon: HomeIcon },
   {
     name: 'Productos',
-    href: '/products',
+    href: '/inicio/productos',
     icon: DocumentDuplicateIcon,
   },
-  { name: 'Perfil', href: '/perfil', icon: UserGroupIcon },
+  { name: 'Perfil', href: '/inicio/perfil', icon: UserGroupIcon },
 ];
 
 export default function NavLinks() {

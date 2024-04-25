@@ -33,34 +33,70 @@ export const logoutUser = () => {
   deleteSessionToken("session");
 }
 
-export const getLoggedUser = async (): Promise<UserDTO> => {
-  const token = await obtainCookie("session");
+export const saveUserRoleCookie = async (): Promise<void> => {
+  try {
+    const token = await obtainCookie("session");
 
-  console.log("Token de la cookie en getLoggedUser: ", token);
+    const axiosHeaders = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
 
-  const axiosHeaders = {
-    Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/json',
-  };
+    const plainHeaders = Object.fromEntries(Object.entries(axiosHeaders));
 
-  const plainHeaders = Object.fromEntries(Object.entries(axiosHeaders));
+    const response = await axios.get(`${API_BASE_URL}/user/loggedUser`, {
+      headers: plainHeaders
+    });
 
-  const response = await axios.get(`${API_BASE_URL}/user/loggedUser`, {
-    headers: plainHeaders
-  })
+    const userData: UserDTO = response.data;
 
-  const userData : UserDTO = response.data;
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 7); // Adding 7 days
 
-  const expirationDate = new Date();
-  expirationDate.setDate(expirationDate.getDate() + 7); // Adding 7 days
+    createSessionToken("userData", JSON.stringify(userData), expirationDate);
+  } catch (error) {
+    console.error('Error saving user role cookie:', error);
+    throw error;
+  }
+};
 
-  console.log("USER DATA: ", userData);
-  // const userRole = .roles.map((role) => role.name).join(',');
-  createSessionToken("userRole", userData.roles[0].name, expirationDate)
+// export const getLoggedUser = async (): Promise<UserDTO> => {
+//   const token = await obtainCookie("session");
 
-  console.log("LOGGED USER RESPONSE: ", response.data);
-  return response.data;
-}
+//   console.log("Token de la cookie en getLoggedUser: ", token);
+
+//   const axiosHeaders = {
+//     Authorization: `Bearer ${token}`,
+//     'Content-Type': 'application/json',
+//   };
+
+//   const plainHeaders = Object.fromEntries(Object.entries(axiosHeaders));
+
+//   const response = await axios.get(`${API_BASE_URL}/user/loggedUser`, {
+//     headers: plainHeaders
+//   })
+
+//   const userData : UserDTO = response.data;
+
+//   const expirationDate = new Date();
+//   expirationDate.setDate(expirationDate.getDate() + 7); // Adding 7 days
+
+//   console.log("USER DATA: ", userData);
+//   // const userRole = .roles.map((role) => role.name).join(',');
+//   createSessionToken("userRole", userData.roles[0].name, expirationDate)
+
+//   console.log("LOGGED USER RESPONSE: ", response.data);
+//   return response.data;
+// }
+
+export const getUserRoleCookie = async (): Promise<string | undefined> => {
+  try {
+    return await obtainCookie("userRole");
+  } catch (error) {
+    console.error('Error getting user role cookie:', error);
+    throw error;
+  }
+};
 
 // export const checkIsTokenValid = async () => {
 //   return await isTokenValid();

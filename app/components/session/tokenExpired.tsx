@@ -4,25 +4,42 @@ import { useState, useEffect } from 'react';
 // import { useRouter } from 'next/navigation';
 // import { isAuthenticated, isTokenValid } from '@/lib/auth.server';
 // import { logoutUser } from '@/lib/auth.service';
-import { useAuth } from '../context/context';
+import { useAuth } from '../../context/context';
 import clsx from 'clsx';
 
 const TokenExpiredModal = ({ initialIsTokenExpired } :any) => {
   const { 
           isTokenExpired, setIsTokenExpired, 
           isLoggingOut, isModalOpen, handleLogout, 
-          handleModalClose, checkTokenExpiration 
+          handleModalClose, setIsModalOpen,
+          checkTokenExpiration
         } = useAuth();
 
-  // console.log("ESTA EXPIRADO?: ", isTokenExpired);
-
   useEffect(() => {
-    setIsTokenExpired(initialIsTokenExpired);
-    const interval = setInterval(checkTokenExpiration, 60000); // Check every minute
+    setIsTokenExpired(initialIsTokenExpired)
+    console.log("First log on use effect");
 
-    // Clean up the interval on component unmount
+    const checkSessionExpiration = async () => {
+      // Aquí puedes realizar la lógica para verificar si la sesión ha expirado
+      // Por ejemplo, podrías llamar a una función de servicio que verifique el estado del token
+      console.log("Executing")
+      const isSessionExpired = await checkTokenExpiration(); // Esta función debe devolver un booleano
+      if (isSessionExpired) {
+        setIsTokenExpired(true); // Marcar la sesión como expirada en el estado
+        setIsModalOpen(true); // Abrir el modal de sesión expirada
+      }
+    };
+
+    // Llama a la función de verificación al cargar el componente y luego cada cierto tiempo
+    checkSessionExpiration();
+    const interval = setInterval(checkSessionExpiration, 60000); // Verifica cada minuto
+
+    // Limpia el intervalo al desmontar el componente
     return () => clearInterval(interval);
-  }, []);
+ // Vacío significa que solo se ejecutará al montar el componente
+
+  }, [])
+
 
   const logoutAndCloseModal = () => {
     handleLogout();
@@ -34,11 +51,6 @@ const TokenExpiredModal = ({ initialIsTokenExpired } :any) => {
 
     handleModalClose();
   };
-
-  console.log("IS MODEL OPEN: ", isModalOpen);
-  if (!isModalOpen) {
-    return null;
-  }
 
   const modalContainerClasses = clsx(
     'fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50',
@@ -60,7 +72,7 @@ const TokenExpiredModal = ({ initialIsTokenExpired } :any) => {
             Log Out
           </button>
           <button
-            onClick={handleExtendSession}
+            // onClick={handleExtendSession}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
           >
             Extend Session

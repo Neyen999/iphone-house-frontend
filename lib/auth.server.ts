@@ -14,14 +14,14 @@ export const isTokenValid = async () => {
   const token = cookies().get('session')?.value;
 
   let decoded = null
-  console.log("VALOR DEL TOKEN: ", token)
+  // console.log("VALOR DEL TOKEN: ", token)
 
   if (token !== undefined && token !== "" && token !== null) {
-    console.log("On invalid token")
+    // console.log("On invalid token")
     decoded = jwtDecode(token);
     const expiration = decoded.exp || 0;
 
-    console.log(expiration);
+    // console.log(expiration);
     // compare to current date and hour
     const now = Date.now();
 
@@ -29,20 +29,24 @@ export const isTokenValid = async () => {
     const expirationDate = new Date(expiration * 1000).toLocaleString();
     const currentDate = new Date(now).toLocaleString();
 
-    console.log("Token expiration time:", expirationDate);
-    console.log("Current time:", currentDate);
+    // console.log("Token expiration time:", expirationDate);
+    // console.log("Current time:", currentDate);
 
 
-    console.log("Is token valid?: ", now < (expiration * 1000))
+    // console.log("Is token valid?: ", now < (expiration * 1000))
     return now < (expiration * 1000);
   }
 
-  console.log("Decoded JWT: ", decoded);
+  // console.log("Decoded JWT: ", decoded);
 
   return false;
 }
 
 export const createSessionToken = async (cookieName: string, data: any, expires: Date) => {
+  console.log("Cookie data: ", {
+    "name": cookieName,
+    "data": data
+  })
   cookies().set(cookieName, data, { expires, httpOnly: true});
 }
 
@@ -60,3 +64,9 @@ export const checkBackendStatus = async () => {
 export const obtainCookie = async (cookieName: string) => {
   return cookies().get(cookieName)?.value;
 }
+
+export const checkTokenExpiration = async () => {
+  const isAuth = await isAuthenticated();
+  const isValid = await isTokenValid();
+  return isAuth && !isValid;
+};

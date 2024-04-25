@@ -9,5 +9,5 @@ interface ContextValue {
   setIsModalOpen: (value: boolean) => void;
   handleLogout: () => Promise<void>;
   handleModalClose: () => void;
-  checkTokenExpiration: () => Promise<void>;
+  checkTokenExpiration: () => Promise<boolean>;
 }

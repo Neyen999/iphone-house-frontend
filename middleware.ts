@@ -1,40 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
-// import { cookies } from 'next/headers';
-// import { isTokenValid } from './lib/auth.service';
 import { isAuthenticated, isTokenValid } from './lib/auth.server';
-import { cookies } from 'next/headers';
-// import { removeTokenIfExists } from './app/actions/removeCookie.server';
-// import { isTokenValid } from './lib/auth.service';
 
 
 export default async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   // Check if the user is authenticated
-  
+  // console.log("MIDDLEWARE IS EXECUTING")
   // Validation
   const isAuth = await isAuthenticated();
   const isValid = await isTokenValid();
 
+  // console.log("MIDDLEWARE VALIDATION: ", !isAuth && !isValid)
   if (!isAuth && !isValid) {
     console.log("direct to login");
     url.pathname = '/login';
     return NextResponse.redirect(url);
   }
 
-  if (isAuth && !isValid) {
-    console.log("redirect to null");
-    return null;
-  }
+  // console.log("PATHNAME: ", req.nextUrl.pathname)
+  // if (req.nextUrl.pathname === "/") {
+  //   console.log("redirect to INICIO");
+  //   url.pathname = "/inicio"
+  //   return NextResponse.redirect(url);
+  // }
 
   // validate roles
-  if (req.cookies.get("userRole") !== null) {
-    const role = req.cookies.get("userRole")?.value;
-    if (role === "ADMIN") {
-      url.pathname = '/administracion';
-      return NextResponse.redirect(url);
-    }
-    // const { roles } = req.cookies.get("user")?.value
-  }
+  // if (req.cookies.get("userRole") !== null) {
+  //   const role = req.cookies.get("userRole")?.value;
+  //   if (role === "ADMIN") {
+  //     url.pathname = '/inicio/administracion';
+  //     return NextResponse.redirect(url);
+  //   }
+  //   // const { roles } = req.cookies.get("user")?.value
+  // }
 
   // req.
 
@@ -58,6 +56,6 @@ export default async function middleware(req: NextRequest) {
 // };
 
 export const config = {
-  matcher: ['/'],
+  matcher: ['/', '/inicio/:path'],
   exclude: ['/login'],
 };
