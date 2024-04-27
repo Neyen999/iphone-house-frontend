@@ -54,7 +54,7 @@ const ContextProvider = ({ children }: any) => {
   const handleLogout = async () => {
     console.log("Handle logout on context provider")
     setIsLoggingOut(true);
-    logoutUser();
+    await logoutUser();
 
     // redirect
     // handleModalClose();

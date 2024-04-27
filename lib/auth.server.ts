@@ -51,6 +51,7 @@ export const createSessionToken = async (cookieName: string, data: any, expires:
 }
 
 export const deleteSessionToken = async (cookieName: string) => {
+  console.log("inside delete cookie for cookie name: ", cookieName);
   cookies().delete(cookieName);
 }
 

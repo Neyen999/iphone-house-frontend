@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { createSessionToken, deleteSessionToken, obtainCookie } from './auth.server';
+import { createSessionToken, deleteSessionToken, obtainCookie, checkTokenExpiration } from './auth.server';
 
 const API_BASE_URL = 'http://localhost:8080/api/v1';
 
@@ -24,8 +24,9 @@ export const loginUser = async (credentials: LoginRequest): Promise<string> => {
   }
 };
 
-export const logoutUser = () => {
-  deleteSessionToken("session");
+export const logoutUser = async () => {
+  await deleteSessionToken("session");
+  await deleteSessionToken("userData");
 }
 
 export const saveUserRoleCookie = async (): Promise<void> => {
@@ -52,19 +53,22 @@ export const getUser = async (): Promise<UserDTO | undefined> => {
   const token = await obtainCookie("session");
 
   if (token !== undefined) {
-    const axiosHeaders = {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    };
-  
-    const plainHeaders = Object.fromEntries(Object.entries(axiosHeaders));
-  
-    const response = await axios.get(`${API_BASE_URL}/user/loggedUser`, {
-      headers: plainHeaders
-    });
-  
-    const userData: UserDTO = response.data;
-    return userData;
+    const tokenIsExpired = await checkTokenExpiration();
+    if (!tokenIsExpired) {
+      const axiosHeaders = {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
+    
+      const plainHeaders = Object.fromEntries(Object.entries(axiosHeaders));
+    
+      const response = await axios.get(`${API_BASE_URL}/user/loggedUser`, {
+        headers: plainHeaders
+      });
+    
+      const userData: UserDTO = response.data;
+      return userData;
+    }
   } else {
     return undefined;
   }
