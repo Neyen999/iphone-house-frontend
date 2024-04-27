@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { saveUserRoleCookie, loginUser } from '@/lib/auth.service';
+import { useAuth } from '../context/context';
 
 const Login = () => {
   const router = useRouter();
@@ -10,6 +11,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loginStatus, setLoginStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const { setIsLoggedIn } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,9 +28,13 @@ const Login = () => {
       const savedUser = await saveUserRoleCookie();
 
       // Simulate a delay of 1 second before redirecting
-      setTimeout(() => {
+      // setTimeout(() => {
         router.push('/inicio');
+      setTimeout(() => {
+        setIsLoggedIn(true);
       }, 1000);
+        // setIsLoggedIn(true);
+      // }, 1000);
       // router.push('/')
     } catch (error) {
       // console.error('Login error:', error);

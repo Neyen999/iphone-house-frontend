@@ -4,13 +4,11 @@ import { isAuthenticated, isTokenValid } from './lib/auth.server';
 
 export default async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
-  // Check if the user is authenticated
-  // console.log("MIDDLEWARE IS EXECUTING")
-  // Validation
+
   const isAuth = await isAuthenticated();
   const isValid = await isTokenValid();
 
-  // console.log("MIDDLEWARE VALIDATION: ", !isAuth && !isValid)
+  console.log("MIDDLEWARE VALIDATION: ", !isAuth && !isValid)
   if (!isAuth && !isValid) {
     console.log("direct to login");
     url.pathname = '/login';
@@ -18,11 +16,11 @@ export default async function middleware(req: NextRequest) {
   }
 
   // console.log("PATHNAME: ", req.nextUrl.pathname)
-  // if (req.nextUrl.pathname === "/") {
-  //   console.log("redirect to INICIO");
-  //   url.pathname = "/inicio"
-  //   return NextResponse.redirect(url);
-  // }
+  if (req.nextUrl.pathname === "/") {
+    console.log("redirect to INICIO");
+    url.pathname = "/inicio"
+    return NextResponse.redirect(url);
+  }
 
   // validate roles
   // if (req.cookies.get("userRole") !== null) {
@@ -56,6 +54,6 @@ export default async function middleware(req: NextRequest) {
 // };
 
 export const config = {
-  matcher: ['/', '/inicio/:path'],
+  matcher: ['/', '/inicio/:path*'],
   exclude: ['/login'],
 };

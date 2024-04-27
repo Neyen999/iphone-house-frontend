@@ -6,6 +6,7 @@ import TokenExpiredModal from './tokenExpired';
 export const TokenExpiredModalWrapper = async () => {
   let result = await checkTokenExpiration();
   
+  console.log("this is executing on server side everytime i switch routes");
   return <TokenExpiredModal initialIsTokenExpired={result} />;
 };
 

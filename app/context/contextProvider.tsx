@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Context from "./context";
-import { logoutUser } from "@/lib/auth.service";
-import { checkTokenExpiration, obtainCookie } from "@/lib/auth.server";
+import { logoutUser, getUser } from "@/lib/auth.service";
+import { checkTokenExpiration } from "@/lib/auth.server";
 
 const ContextProvider = ({ children }: any) => {
   const router = useRouter();
@@ -12,21 +12,28 @@ const ContextProvider = ({ children }: any) => {
   const [isTokenExpired, setIsTokenExpired] = useState<boolean>(false);
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   useEffect(() => {
     console.log("Context provider render");
 
     const handleUser = async () => {
-      const userFromCookie = await obtainCookie("userData");
-      if (userFromCookie !== undefined) {
-        console.log("USER FROM COOKIE: ", userFromCookie)
-        const parsedUser = JSON.parse(userFromCookie);
+      // setIsLoading(false);
+      const loggedUser = await getUser();
+      if (loggedUser !== undefined) {
+        console.log("LOGGED USER: ", loggedUser)
         // updateUser(parsedUser);
-        setUser(parsedUser);
+        setUser(loggedUser);
+        console.log("AFTER SETTER: ", loggedUser)
+        setIsLoading(false); 
       }
     }
-    handleUser();
-  }, []);
+    // setTimeout(() => {
+      handleUser();
+    // }, 1000);
+    console.log("IS LOADING VALUE: ", isLoading)
+  }, [isLoggedIn]);
 
   // useEffect(() => {
   //   console.log("USER AFTER USE EFFECT: ", user);
@@ -56,13 +63,17 @@ const ContextProvider = ({ children }: any) => {
 
   const contextValue: ContextValue = {
     user,
-    setUser,
     isTokenExpired,
     isLoggingOut,
     isModalOpen,
+    isLoading,
+    isLoggedIn,
     setIsTokenExpired,
     setIsLoggingOut,
     setIsModalOpen,
+    setUser,
+    setIsLoading,
+    setIsLoggedIn,
     handleLogout,
     handleModalClose,
     checkTokenExpiration

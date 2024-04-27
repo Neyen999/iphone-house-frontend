@@ -16,7 +16,7 @@ const TokenExpiredModal = ({ initialIsTokenExpired } :any) => {
         } = useAuth();
 
   useEffect(() => {
-    setIsTokenExpired(initialIsTokenExpired)
+    setIsTokenExpired(initialIsTokenExpired);
     console.log("First log on use effect");
 
     const checkSessionExpiration = async () => {
