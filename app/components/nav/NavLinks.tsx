@@ -17,6 +17,11 @@ const links = [
     href: '/inicio/productos',
     icon: DocumentDuplicateIcon,
   },
+  {
+    name: 'Stock',
+    href: '/inicio/stock',
+    icon: DocumentDuplicateIcon,
+  },
   { name: 'Perfil', href: '/inicio/perfil', icon: UserGroupIcon },
 ];
 

@@ -10,14 +10,14 @@ const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loginStatus, setLoginStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [error, setError] = useState('');
   const { setIsLoggedIn } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     setLoginStatus('idle');
-    setErrorMessage('');
+    setError('');
 
     const request: LoginRequest = { username, password };
 
@@ -27,20 +27,14 @@ const Login = () => {
 
       const savedUser = await saveUserRoleCookie();
 
-      // Simulate a delay of 1 second before redirecting
-      // setTimeout(() => {
-        router.push('/inicio');
       setTimeout(() => {
         setIsLoggedIn(true);
       }, 1000);
-        // setIsLoggedIn(true);
-      // }, 1000);
-      // router.push('/')
     } catch (error) {
-      // console.error('Login error:', error);
       setLoginStatus('error');
-      setErrorMessage('Usuario o contraseña incorrectos.');
+      setError('Usuario o contraseña incorrectos.');
     }
+    router.push('/inicio');
   };
 
   return (
@@ -72,7 +66,7 @@ const Login = () => {
             />
           </div>
           {loginStatus === 'error' && (
-            <div className="mb-4 text-red-500 font-bold">{errorMessage}</div>
+            <div className="mb-4 text-red-500 font-bold">{error}</div>
           )}
           <div className="flex items-center justify-between">
             <button

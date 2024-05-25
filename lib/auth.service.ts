@@ -14,7 +14,7 @@ export const loginUser = async (credentials: LoginRequest): Promise<string> => {
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + 7); // Adding 7 days
 
-    createSessionToken("session", response.data.token, expirationDate);
+    createSessionToken("__iphonehouse_varela__", response.data.token, expirationDate);
 
     return response.data; 
     //return response.data;
@@ -25,8 +25,8 @@ export const loginUser = async (credentials: LoginRequest): Promise<string> => {
 };
 
 export const logoutUser = async () => {
-  await deleteSessionToken("session");
-  await deleteSessionToken("userData");
+  await deleteSessionToken("__iphonehouse_varela__");
+  await deleteSessionToken("__user_data__");
 }
 
 export const saveUserRoleCookie = async (): Promise<void> => {
@@ -42,7 +42,7 @@ export const saveUserRoleCookie = async (): Promise<void> => {
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + 7); // Adding 7 days
 
-    createSessionToken("userData", JSON.stringify(userDataForCookie), expirationDate);
+    createSessionToken("__user_data__", JSON.stringify(userDataForCookie), expirationDate);
   } catch (error) {
     console.error('Error saving user role cookie:', error);
     throw error;
@@ -50,7 +50,7 @@ export const saveUserRoleCookie = async (): Promise<void> => {
 };
 
 export const getUser = async (): Promise<UserDTO | undefined> => {
-  const token = await obtainCookie("session");
+  const token = await obtainCookie("__iphonehouse_varela__");
 
   if (token !== undefined) {
     const tokenIsExpired = await checkTokenExpiration();

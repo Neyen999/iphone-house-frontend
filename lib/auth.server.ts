@@ -5,13 +5,13 @@ import { NextRequest } from 'next/server';
 import { jwtDecode } from "jwt-decode";
 
 export const isAuthenticated = async () => {
-  const token = cookies().get('session')?.value;
+  const token = cookies().get('__iphonehouse_varela__')?.value;
 
   return token !== undefined;
 };
 
 export const isTokenValid = async () => {
-  const token = cookies().get('session')?.value;
+  const token = cookies().get('__iphonehouse_varela__')?.value;
 
   let decoded = null
   // console.log("VALOR DEL TOKEN: ", token)
