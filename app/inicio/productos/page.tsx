@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getProducts } from '@/lib/product/product.service';
 import AddProductForm from '@/app/components/products/AddProductForm';
-import ProductsList from '@/app/components/products/ProductsList';
+import ItemsList from '@/app/components/products/ItemsList';
 import { PlusCircleIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 
@@ -118,7 +118,7 @@ const Products = () => {
         }
         
       </div>
-      <ProductsList products={products} title='' boxSize='small' cols='6' updatable={true}/>
+      <ItemsList items={products} title='' boxSize='small' cols='6' updatable={true}/>
     </div>
   );
 };

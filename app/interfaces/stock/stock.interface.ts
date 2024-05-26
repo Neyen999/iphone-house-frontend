@@ -23,5 +23,5 @@ interface ProductSimpleDto {
     id: number;
     name: string;
   };
-  price: number;
+  // price: number;
 }

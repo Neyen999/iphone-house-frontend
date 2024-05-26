@@ -107,7 +107,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ onSubmit, onClose }) =>
             type='select'
             label='Seleccione una Categoria'
             required
-            fields={["Cargadores", "Pines", "Otros"]}
+            fields={categories.map(cat => cat.name)}
           />
           <Input 
             id='idealStock'

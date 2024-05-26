@@ -1,6 +1,9 @@
 interface SaleDto {
   id: number;
-  productSales: ProductSaleDto[]
+  productSales: ProductSaleDto[];
+  name: string;
+  totalProducts: number;
+  totalSoldProducts: number;
 }
 
 interface ProductSaleDto {
