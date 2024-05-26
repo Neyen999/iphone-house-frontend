@@ -14,6 +14,13 @@ const ContextProvider = ({ children }: any) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [editingStock, setEditingStock] = useState<StockDto | null>(null);
+  const [isEditingModalOpen, setIsEditingModalOpen] = useState<boolean>(false);
+
+  const handleEdit = (row: StockDto | null) => {
+    setEditingStock(row);
+    setIsEditingModalOpen(true);
+  };
 
   useEffect(() => {
     console.log("Context provider render");
@@ -76,7 +83,11 @@ const ContextProvider = ({ children }: any) => {
     setIsLoggedIn,
     handleLogout,
     handleModalClose,
-    checkTokenExpiration
+    checkTokenExpiration,
+    editingStock,
+    isEditingModalOpen, 
+    setIsEditingModalOpen,
+    handleEdit
   }
 
   return <Context.Provider value={contextValue}>{children}</Context.Provider>;

@@ -16,5 +16,8 @@ const config: Config = {
     },
   },
   plugins: [require('@tailwindcss/forms')],
+  // purge: [
+  //   // '--tw-ring-shadow'
+  // ]
 };
 export default config;

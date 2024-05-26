@@ -14,4 +14,8 @@ interface ContextValue {
   handleLogout: () => Promise<void>;
   handleModalClose: () => void;
   checkTokenExpiration: () => Promise<boolean>;
+  editingStock: StockDto | null;
+  isEditingModalOpen: boolean;
+  setIsEditingModalOpen: (value: boolean) => void;
+  handleEdit: (value: StockDto | null) => void;
 }

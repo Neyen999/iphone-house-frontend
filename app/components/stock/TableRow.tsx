@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TableRow as MUITableRow, TableCell } from '@mui/material';
 import { TableColumn } from '@/app/types/TableColumn';
 import { getValueByAccessorKey } from '@/app/types/TableColumn';
 import ActionsCell from './ActionsCell';
+import { useAuth } from '@/app/context/context';
 
 
 // interface TableRowProps<TData> {
@@ -24,9 +25,11 @@ const TableRow = <TData extends object>({
   // handleEdit,
   // handleDelete,
 }: TableRowProps) => {
-  const renderCellValue = (value: any) => {
-    if (typeof value === 'boolean') {
-      return value ? 'True' : 'False';
+  const renderCellValue = (value: any, accessorKey: string) => {
+    if (accessorKey === 'finalStock' && (value === null || value === undefined)) {
+      return 'N/A';
+    } else if (typeof value === 'boolean') {
+      return value ? 'Si' : 'No';
     } else if (typeof value === 'object' && value !== null) {
       if ('name' in value) {
         return value.name;
@@ -38,11 +41,8 @@ const TableRow = <TData extends object>({
     }
   };
 
-  const handleEdit = (row: StockDto) => {
-    // Lógica para editar la fila
-    console.log('Editar fila:', row);
-  };
-
+  const { handleEdit } = useAuth();
+  
   const handleDelete = (row: StockDto) => {
     // Lógica para eliminar la fila
     console.log('Eliminar fila:', row);
@@ -56,10 +56,10 @@ const TableRow = <TData extends object>({
     <MUITableRow>
       {columns.map((column, index) => {
         const value = getValueByAccessorKey(row, column.accessorKey);
-        console.log("El valor es: " + value)
+        // console.log("El valor es: " + value)
         const isValueNumeric = isNumeric(value);
 
-        console.log("Es numerico el valor: " + value + "? " + isValueNumeric)
+        // console.log("Es numerico el valor: " + value + "? " + isValueNumeric)
 
         return(
         <TableCell
@@ -82,7 +82,7 @@ const TableRow = <TData extends object>({
               handleDelete={handleDelete}
             />
           ) : (
-            renderCellValue(getValueByAccessorKey(row, column.accessorKey))
+            renderCellValue(getValueByAccessorKey(row, column.accessorKey), column.accessorKey as string)
           )}
           {/* {renderCellValue(getValueByAccessorKey(row, column.accessorKey))} */}
         </TableCell>

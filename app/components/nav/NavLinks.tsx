@@ -4,7 +4,9 @@ import {
   UserGroupIcon,
   HomeIcon,
   DocumentDuplicateIcon,
+  CurrencyDollarIcon
 } from '@heroicons/react/24/outline';
+// import CurrencyDollarIcon from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
@@ -16,6 +18,11 @@ const links = [
     name: 'Productos',
     href: '/inicio/productos',
     icon: DocumentDuplicateIcon,
+  },
+  {
+    name: 'Ventas',
+    href: '/inicio/ventas',
+    icon: CurrencyDollarIcon,
   },
   {
     name: 'Stock',

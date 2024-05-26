@@ -30,6 +30,10 @@ body {
     rgb(var(--background-start-rgb));
 }
 
+[type='text']:focus {
+  --tw-ring-offset-shadow: none;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

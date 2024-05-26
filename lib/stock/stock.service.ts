@@ -34,9 +34,16 @@ axiosInstance.interceptors.request.use(async (config) => {
 // };
 
 // Método para obtener todos los productos
-export const getStocks = async (): Promise<StockDto[]> => {
+export const getStocks = async (page?: number, 
+                                size?: number, 
+                                search?: (string | null), 
+                                date?: (Date | null)): Promise<Page<StockDto>> => {
+  console.log(page, size, search, date)
   try {
-    const response = await axiosInstance.get('/stock/stocks');
+    const formattedDate = date ? date.toISOString().split('T')[0] : null;
+    const response = await axiosInstance.get('/stock/stocks', {
+      params: { page, size, search, date: formattedDate }
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching stocks:', error);
