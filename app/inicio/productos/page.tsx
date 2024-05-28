@@ -1,22 +1,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getProducts } from '@/lib/product/product.service';
+import { editProduct, getProducts } from '@/lib/product/product.service';
 import AddProductForm from '@/app/components/products/AddProductForm';
 import ItemsList from '@/app/components/products/ItemsList';
 import { PlusCircleIcon } from '@heroicons/react/24/outline';
+import TextField from '@mui/material/TextField';
 import clsx from 'clsx';
+import { getCategories } from '@/lib/product/category.service';
 
 const Products = () => {
   const [showAddProductPopup, setShowAddProductPopup] = useState(false);
   const [products, setProducts] = useState<ProductDto[]>([]);
-  // const [categories, setCategories] = useState<CategoryDto[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [categories, setCategories] = useState<CategoryDto[]>([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const productsData = await getProducts();
+        const productsData = await getProducts(searchQuery);
         setProducts(productsData);
         setLoading(false);
       } catch (error) {
@@ -26,7 +30,20 @@ const Products = () => {
     };
 
     fetchProducts();
-  }, []);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const categoriesResponse = await getCategories();
+      setCategories(categoriesResponse);
+    }
+    fetchCategories();
+  }, [])
+  
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+    setInitialLoad(false); // Indicar que se ha realizado una búsqueda
+  };
 
   const handleAddProductClick = () => {
     setShowAddProductPopup(true);
@@ -43,9 +60,14 @@ const Products = () => {
     // products.push(formData);
   };
 
-  const centerAllWhenNoProducts = {"justify-center items-center h-full": products.length == 0};
-  const normalWhenProducts = {"justify-around": products.length > 0};
+  const handleEditProduct = (formData: any) => {
+    console.log("Product a Editar: " + formData);
+  }
 
+  const centerAllWhenNoProducts = { "justify-center items-center h-full": products.length === 0 && initialLoad };
+  const normalWhenProducts = { "justify-around": products.length > 0 };
+
+  console.log(products)
   // return (
   //   <div>
   //     {/* <h1 className="text-2xl font-bold mb-4">Lista de Productos</h1> */}
@@ -92,33 +114,47 @@ const Products = () => {
           ? <p>Cargando...</p>
           : 
           <div className="relative flex-grow">
-          <div className='flex-col'>
-            <div className={`flex ${products.length > 0 ? 'justify-start' : 'justify-center'}`}>
-              {/* Cambiado a justify-start para alinear a la izquierda */}
-              <button
-                className="bg-blue-500 text-white font-semibold py-2 px-2 rounded flex items-center justify-left" 
-                onClick={handleAddProductClick}
-              >
-                <PlusCircleIcon className="h-5 w-5 mr-1 md:mr-2" /> {/* Ajustar el tamaño del ícono */}
-                <span className="hidden md:inline">Añadir Producto</span>
-              </button>
+            <div className='flex-col'>
+              <div className="flex mb-4 gap-2">
+                <TextField
+                  label="Buscar"
+                  variant="outlined"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  fullWidth
+                  sx={{ backgroundColor: 'white', borderRadius: 2, width: '50%', maxWidth: 500, display: `${initialLoad && products.length === 0 ? 'none' : 'block'}`}}
+                />
+              </div>
+              <div className={`flex ${products.length > 0 ? 'justify-start' : 'justify-center'}`}>
+                {/* Cambiado a justify-start para alinear a la izquierda */}
+                <button
+                  className="bg-blue-500 text-white font-semibold py-2 px-2 rounded flex items-center justify-left" 
+                  onClick={handleAddProductClick}
+                >
+                  <PlusCircleIcon className="h-5 w-5 mr-1 md:mr-2" /> {/* Ajustar el tamaño del ícono */}
+                  <span className="hidden md:inline">Añadir Producto</span>
+                </button>
+              </div>
+              {
+                products.length == 0 && 
+                <p className='flex justify-center'>No tenes ningún producto, ¡intenta añadir uno!</p>
+              }
             </div>
-            {
-              products.length == 0 && 
-              <p className='flex justify-center'>No tenes ningún producto, ¡intenta añadir uno!</p>
-            }
-          </div>
-          {showAddProductPopup && (
-            <AddProductForm
-              onClose={handleCloseAddProductPopup}
-              onSubmit={handleSubmit}
-            />
-          )}
+            {showAddProductPopup && (
+              <AddProductForm
+                categories={categories}
+                onClose={handleCloseAddProductPopup}
+                onSubmit={handleSubmit}
+              />
+            )}
         </div>
         }
         
       </div>
-      <ItemsList items={products} title='' boxSize='small' cols='6' updatable={true}/>
+      {products.length > 0 
+      && categories.length > 0 
+      ?       <ItemsList items={products} title='' boxSize='small' cols='6' updatable={true} categories={categories}/>
+      : ''}
     </div>
   );
 };

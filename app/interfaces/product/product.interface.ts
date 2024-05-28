@@ -7,4 +7,6 @@ interface ProductDto {
   initialRegisterStock: number;
   initialStock: number;
   tester: boolean;
+  availableQuantity?: number;
+  totalSold?: number;
 }

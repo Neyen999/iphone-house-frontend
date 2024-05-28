@@ -5,6 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import SecondPhoto from "@/assets/photo2.jpg";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import EditProductForm from "./EditProductForm";
 
 interface ItemsListProps {
   items: any[], // Cambia el nombre de products a items y permite cualquier tipo
@@ -12,51 +13,53 @@ interface ItemsListProps {
   boxSize: string,
   cols: string,
   updatable?: boolean,
-  // getItemName: (item: any) => string, // Función para obtener el nombre del item
-  // getItemCategory?: (item: any) => string // Función opcional para obtener la categoría del item
+  categories?: CategoryDto[]
 }
 
-const ItemsList = ({ items, title, boxSize, cols, updatable, 
+const ItemsList = ({ items, title, boxSize, cols, updatable, categories 
   // getItemName, getItemCategory 
 }: ItemsListProps) => {
   // const [itemName, setItemName] = useState<string | null>(null);
   // const [itemCategory, setItemCategory] = useState<string | null>(null);
 
   // let sortedItems = [...items];
+  const [isOpenForm, setIsOpenForm] = useState<boolean>(false);
+  const [isOpenWarning, setIsOpenWarning] = useState<boolean>(false);
 
-  const handleEditClick = (itemId: string) => {
-    console.log('Editar item:', itemId);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+
+  const handleEditClick = (item: any) => {
+    setSelectedItem(item);
+    setIsOpenForm(true);
   };
 
-  const handleDeleteClick = (itemId: string) => {
-    console.log('Eliminar item:', itemId);
+  const handleDeleteClick = (item: any) => {
+    setSelectedItem(item);
+    setIsOpenWarning(true);
   };
 
-  const getItemName = (item: any) => {
-    if (item && item.name) {
-      return item.name
-    }
-  }
+  const handleEditSubmit = (formData: any) => {
+    console.log("Producto editado:", formData);
+    // Lógica para actualizar el producto
+  };
 
-  const getItemCategory = (item: any) => {
-    if (item && item.category) {
-      return item.category.name;
-    }
-  }
+  const handleDeleteConfirm = () => {
+    console.log("Producto eliminado:", selectedItem);
+    // Lógica para eliminar el producto
+    setIsOpenWarning(false);
+  };
 
-  const getItemTotalProduct = (item: any) => {
-    if (item && item.totalProducts) {
-      return item.totalProducts;
-    }
-  }
+  const getItemName = (item: any) => item?.name || "";
   
-  const getItemValue = (item: any, itemValue: any) => {
-    // console.log("Item")
+  const getItemValue = (item: any) => {
+    console.log(item)
     // console.log(itemValue)
-    if (item && itemValue) {
-      return itemValue;
-    }
+    // if (item && itemValue) {
+    //   return itemValue;
+    // }
   }
+  // const getItemValue = (item: any, itemValue: any) => {return itemValue};
+
 
 
   const boxMaxSizeClass = boxSize === 'small' ? 'max-w-xs' : 'max-w-md';
@@ -73,24 +76,45 @@ const ItemsList = ({ items, title, boxSize, cols, updatable,
               <h3 className="text-lg font-semibold">{getItemName(item)}</h3>
               {updatable && (
                 <div className="flex">
-                  <PencilIcon className="h-6 w-6 text-blue-500 cursor-pointer mr-2" onClick={() => handleEditClick("1")} />
-                  <TrashIcon className="h-6 w-6 text-red-500 cursor-pointer" onClick={() => handleDeleteClick("1")} />
+                  <PencilIcon className="h-6 w-6 text-blue-500 cursor-pointer mr-2" onClick={() => handleEditClick(item)} />
+                  <TrashIcon className="h-6 w-6 text-red-500 cursor-pointer" onClick={() => handleDeleteClick(item)} />
                 </div>
               )}
             </div>
             {
-              getItemValue(item, item.category) != null 
-              && <p className="text-gray-600">Categoría: {getItemValue(item, item.category.name)}</p>
+              item.category != null 
+              && <p className="text-gray-600">Categoría: {item.category.name}</p>
             }
             {
-              getItemValue(item, item.totalProducts) != null 
-              && <p className="text-gray-600">Productos Totales: {getItemValue(item, item.totalProducts)}</p>
+              item.totalProducts != null 
+              && <p className="text-gray-600">Productos Totales: {item.totalProducts}</p>
             }
             {
-              getItemValue(item, item.totalSoldProducts) != null 
-              && <p className="text-gray-600">Productos Totales Vendidos: {getItemValue(item, item.totalSoldProducts)}</p>
+              item.totalSoldProducts != null
+              && <p className="text-gray-600">Productos Totales Vendidos: {item.totalSoldProducts}</p>
             }
-            {/* {getItemCategory(item) != null && <p className="text-gray-600">Categoría: {getItemCategory(item)}</p>} */}
+            {
+              item.availableQuantity != null
+              && <p className="text-gray-600">Cantidad Disponible: {item.availableQuantity}</p>
+            }
+            {
+              item.totalSold != null
+              && <p className="text-gray-600">Cantidad Vendida: {item.totalSold}</p>
+            }
+            {isOpenForm && (
+              <EditProductForm
+                product={selectedItem}
+                categories={categories || []}
+                onClose={() => setIsOpenForm(false)}
+                onSubmit={handleEditSubmit}
+              />
+            )}
+            {/* {isOpenWarning && (
+              <DeleteWarning
+                onClose={() => setIsOpenWarning(false)}
+                onDelete={handleDeleteConfirm}
+              />
+            )} */}
           </div>
         ))}
       </div>

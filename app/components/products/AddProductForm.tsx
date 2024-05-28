@@ -2,15 +2,17 @@ import React, { useState, useEffect } from 'react';
 import Input from '../input/Input';
 import { getCategories } from '@/lib/product/category.service';
 
-const AddProductForm: React.FC<AddProductFormProps> = ({ onSubmit, onClose }) => {
+const AddProductForm: React.FC<AddProductFormProps> = ({ categories, onSubmit, onClose }) => {
   const [name, setName] = useState<string>('');
-  const [category, setCategory] = useState<string>('');
+  // const [category, setCategory] = useState<string>('');
   const [idealStock, setIdealStock] = useState<string>("0");
   const [initialStock, setInitialStock] = useState<number>(0);
   const [initialCounterStock, setInitialCounterStock] = useState<string>("0");
   const [initialRegisterStock, setInitialRegisterStock] = useState<string>("0");
   const [tester, setTester] = useState<boolean>(false);
-  const [categories, setCategories] = useState<CategoryDto[]>([]);
+  // const [categories, setCategories] = useState<CategoryDto[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryDto | null>(null);
+
 
   useEffect(() => {
     setInitialStock((parseInt(initialCounterStock) || 0) + (parseInt(initialRegisterStock) || 0));
@@ -24,13 +26,13 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ onSubmit, onClose }) =>
     }
   }, [tester]);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const categoriesResponse = await getCategories();
-      setCategories(categoriesResponse);
-    }
-    fetchCategories();
-  }, [])
+  // useEffect(() => {
+  //   const fetchCategories = async () => {
+  //     const categoriesResponse = await getCategories();
+  //     setCategories(categoriesResponse);
+  //   }
+  //   fetchCategories();
+  // }, [])
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     if (e.target.value === "0") {
@@ -74,7 +76,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ onSubmit, onClose }) =>
 
     onSubmit({
       name,
-      category: { name: category },
+      category: selectedCategory != null ? selectedCategory : { id: 0, name: ''},
       idealStock: parseInt(idealStock) || 0,
       initialCounterStock: parseInt(initialCounterStock) || 0,
       initialRegisterStock: parseInt(initialRegisterStock) || 0,
@@ -100,9 +102,14 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ onSubmit, onClose }) =>
           />
           <Input 
             id='category'
-            value={category}
+            value={selectedCategory?.name || ''}
             onFocus={handleFocus}
-            onChange={(e) => setCategory(e.target.value)}
+            // onChange={(e) => setCategory(e.target.value)}
+            onChange={(e) => {
+              const foundCategory: CategoryDto | null = categories.find((cat) => cat.name === e.target.value) || null;
+              setSelectedCategory(foundCategory)
+              // setSelectedCategory({...selectedCategory, [index]: e.target.value }); // Actualizo el estado productSelections para este índice
+            }}
             placeholder='Categoria'
             type='select'
             label='Seleccione una Categoria'

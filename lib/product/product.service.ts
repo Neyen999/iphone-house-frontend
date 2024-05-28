@@ -34,9 +34,11 @@ export const saveProduct = async (product: ProductDto): Promise<ProductDto> => {
 };
 
 // Método para obtener todos los productos
-export const getProducts = async (): Promise<ProductDto[]> => {
+export const getProducts = async (search?: (string | null)): Promise<ProductDto[]> => {
   try {
-    const response = await axiosInstance.get('/product/products');
+    const response = await axiosInstance.get('/product/products', {
+      params: { search }
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching products:', error);

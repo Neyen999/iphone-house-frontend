@@ -62,20 +62,20 @@ const TokenExpiredModal = ({ initialIsTokenExpired } :any) => {
   return (
     <div className={modalContainerClasses}>
       <div className="bg-white p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-4">Your session has expired</h2>
-        <div className="flex justify-end space-x-4">
+        <h2 className="text-2xl font-bold mb-4">Tu sesión ha expirado.</h2>
+        <div className="flex justify-center space-x-4">
           <button
             onClick={logoutAndCloseModal}
             disabled={isLoggingOut}
             className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 disabled:opacity-50"
           >
-            Log Out
+            Salir
           </button>
           <button
             // onClick={handleExtendSession}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
           >
-            Extend Session
+            Extender
           </button>
         </div>
       </div>

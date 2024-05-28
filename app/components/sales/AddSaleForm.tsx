@@ -38,26 +38,7 @@ const AddSaleForm: React.FC<AddSaleFormProps> = ({ onSubmit, onClose }) => {
     };
     fetchProducts();
   }, []);
-
-  // const handleAddProductSale = () => {
-  //   setProductSales([
-  //     ...productSales,
-  //     { 
-  //       id: 0, 
-  //       product: { 
-  //         id: selectedProduct?.id || 0, 
-  //         name: selectedProduct?.name || '', 
-  //         category: {
-  //           id: selectedProduct?.category.id || 0,
-  //           name: selectedProduct?.category.name || ''
-  //         }
-  //       }, 
-  //       totalQuantity: 0, 
-  //       registerQuantity: 0, 
-  //       counterQuantity: 0 
-  //     }
-  //   ]);
-  // };
+  
   const handleAddProductSale = () => {
     const newProductSale: ProductSaleDto = {
       id: 0,
