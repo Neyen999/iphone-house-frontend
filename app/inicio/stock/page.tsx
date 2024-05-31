@@ -54,6 +54,8 @@ const Stock = () => {
       header: '',
       // Cell: ({ row }) => <ActionsCell row={row} handleEdit={handleEdit} handleDelete={handleDelete} />,
     },
+    { accessorKey: 'product.name', header: 'Producto' },
+    { accessorKey: 'product.category.name', header: 'Categoria' },
     { accessorKey: 'idealStock', header: 'Stock Ideal' },
     { accessorKey: 'initialStock', header: 'Stock Inicial' },
     { accessorKey: 'initialCounterStock', header: 'Inicial Mostrador' },
@@ -66,9 +68,7 @@ const Stock = () => {
     { accessorKey: 'currentCounterStock', header: 'Stock Act. Mostrador' },
     { accessorKey: 'currentStock', header: 'Stock Act. Gral' },
     { accessorKey: 'finalStock', header: 'Stock Final' },
-    { accessorKey: 'tester', header: 'Tester' },
-    { accessorKey: 'product.name', header: 'Producto' },
-    { accessorKey: 'product.category.name', header: 'Categoria' },
+    { accessorKey: 'tester', header: 'Tester' }
   ], []);
 
   // const data = [

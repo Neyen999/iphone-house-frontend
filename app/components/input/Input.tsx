@@ -3,7 +3,7 @@ interface InputProps<T = string> {
   value: any;
   onFocus?: (value: any) => void;
   onChange: (value: any) => void;
-  type?: 'text' | 'number' | 'email' | 'password' | 'select' | 'checkbox';
+  type?: 'text' | 'number' | 'email' | 'password' | 'select' | 'checkbox' | string;
   placeholder?: string;
   label?: string;
   required?: boolean;

@@ -5,7 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import SecondPhoto from "@/assets/photo2.jpg";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
-import EditProductForm from "./EditProductForm";
+import EditItemForm from "./EditItemForm";
 
 interface ItemsListProps {
   items: any[], // Cambia el nombre de products a items y permite cualquier tipo
@@ -13,24 +13,27 @@ interface ItemsListProps {
   boxSize: string,
   cols: string,
   updatable?: boolean,
-  categories?: CategoryDto[]
+  onUpdate?: (data: any) => void;
+  onDelete?: (id: number) => void;
+  fields: { id: string; label: string; type: string; options?: any[] }[];
 }
 
-const ItemsList = ({ items, title, boxSize, cols, updatable, categories 
-  // getItemName, getItemCategory 
-}: ItemsListProps) => {
-  // const [itemName, setItemName] = useState<string | null>(null);
-  // const [itemCategory, setItemCategory] = useState<string | null>(null);
+const ItemsList = ({ items, title, boxSize, cols, updatable, onUpdate, onDelete, fields }: ItemsListProps) => {
 
-  // let sortedItems = [...items];
   const [isOpenForm, setIsOpenForm] = useState<boolean>(false);
   const [isOpenWarning, setIsOpenWarning] = useState<boolean>(false);
+  const [activeModal, setActiveModal] = useState(null);
 
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
   const handleEditClick = (item: any) => {
     setSelectedItem(item);
-    setIsOpenForm(true);
+    // setIsOpenForm(true);
+    setActiveModal(item.id);
+  };
+
+  const handleCloseModal = () => {
+    setActiveModal(null);
   };
 
   const handleDeleteClick = (item: any) => {
@@ -39,13 +42,19 @@ const ItemsList = ({ items, title, boxSize, cols, updatable, categories
   };
 
   const handleEditSubmit = (formData: any) => {
-    console.log("Producto editado:", formData);
+    console.log("Here")
+    if (onUpdate) {
+      onUpdate(formData)
+    }
+    setIsOpenForm(false)
+    // console.log("Producto editado:", formData);
     // Lógica para actualizar el producto
   };
 
-  const handleDeleteConfirm = () => {
-    console.log("Producto eliminado:", selectedItem);
-    // Lógica para eliminar el producto
+  const handleDeleteConfirm = (id: number) => {
+    if (onDelete) {
+      onDelete(id)
+    }
     setIsOpenWarning(false);
   };
 
@@ -77,7 +86,7 @@ const ItemsList = ({ items, title, boxSize, cols, updatable, categories
               {updatable && (
                 <div className="flex">
                   <PencilIcon className="h-6 w-6 text-blue-500 cursor-pointer mr-2" onClick={() => handleEditClick(item)} />
-                  <TrashIcon className="h-6 w-6 text-red-500 cursor-pointer" onClick={() => handleDeleteClick(item)} />
+                  <TrashIcon className="h-6 w-6 text-red-500 cursor-pointer" onClick={() => handleDeleteClick(item.id)} />
                 </div>
               )}
             </div>
@@ -101,11 +110,13 @@ const ItemsList = ({ items, title, boxSize, cols, updatable, categories
               item.totalSold != null
               && <p className="text-gray-600">Cantidad Vendida: {item.totalSold}</p>
             }
-            {isOpenForm && (
-              <EditProductForm
-                product={selectedItem}
-                categories={categories || []}
-                onClose={() => setIsOpenForm(false)}
+            {activeModal === item.id && (
+              <EditItemForm
+                // product={selectedItem}
+                // categories={categories || []}
+                item={selectedItem}
+                fields={fields}
+                onClose={handleCloseModal}
                 onSubmit={handleEditSubmit}
               />
             )}

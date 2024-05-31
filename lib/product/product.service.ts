@@ -58,12 +58,12 @@ export const getProductById = async (id: string): Promise<ProductDto> => {
 };
 
 // Método para editar un producto
-export const editProduct = async (id: string, product: ProductDto): Promise<ProductDto> => {
+export const editProduct = async (product: ProductDto): Promise<ProductDto> => {
   try {
-    const response = await axiosInstance.put(`/product/${id}`, product);
+    const response = await axiosInstance.put(`/product/products/${product.id}`, product);
     return response.data;
   } catch (error) {
-    console.error(`Error editing product with id ${id}:`, error);
+    console.error(`Error editing product with id ${product.id}:`, error);
     throw error;
   }
 };
