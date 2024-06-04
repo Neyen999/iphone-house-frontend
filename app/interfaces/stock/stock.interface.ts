@@ -19,9 +19,11 @@ interface StockDto {
 interface ProductSimpleDto {
   id: number;
   name: string;
-  category: {
-    id: number;
-    name: string;
-  };
+  category: CategoryDto;
+  // category: {
+  //   id: number;
+  //   name: string;
+  // };
+  tester: boolean;
   // price: number;
 }

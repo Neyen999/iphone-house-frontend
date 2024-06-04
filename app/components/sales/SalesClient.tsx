@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from 'react';
 import { getSales, saveSale } from '@/lib/sale/sale.service';
@@ -10,22 +10,24 @@ import TextField from '@mui/material/TextField';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers';
+import RecentSales from './RecentSales';
+import PaymentMethods from './PaymentMethods';
+import SalesSummary from './SalesSummary';
 
 const SalesClient = ({ initialSales }: { initialSales: SaleDto[] }) => {
   const [showAddSalePopup, setShowAddSalePopup] = useState(false);
   const [sales, setSales] = useState<SaleDto[]>(initialSales);
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
     const fetchSales = async () => {
-      // setLoading(true)
       try {
         const salesData = await getSales(searchQuery, selectedDate);
-        setSales(salesData);
-        // setLoading(false);
+        setSales(salesData.content);
+        console.log("Inside here")
       } catch (error) {
         console.error('Error fetching sales:', error);
         setLoading(false);
@@ -41,12 +43,11 @@ const SalesClient = ({ initialSales }: { initialSales: SaleDto[] }) => {
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
-    // setInitialLoad(false); // Indicar que se ha realizado una búsqueda
   };
 
   const handleDateChange = (date: Date | null) => {
     setSelectedDate(date);
-    setInitialLoad(false); // Indicar que se ha realizado una búsqueda
+    setInitialLoad(false);
   };
 
   const handleAddSaleClick = () => {
@@ -59,26 +60,25 @@ const SalesClient = ({ initialSales }: { initialSales: SaleDto[] }) => {
 
   const handleSubmit = async (formData: SaleDto) => {
     try {
-      const savedSale = await saveSale(formData);
-      console.log('Nueva venta:', savedSale);
-      setSales([...sales, savedSale]);
+      // const savedSale = await saveSale(formData);
+      // setSales([...sales, savedSale]);
+      console.log("SUBMIT")
+      console.log(formData)
       setShowAddSalePopup(false);
     } catch (error) {
       console.error('Error saving sale:', error);
     }
   };
 
-  const centerAllWhenNoSales = { "justify-center items-center h-full": sales.length === 0 && initialLoad };
-  const normalWhenSales = { "justify-around": sales.length > 0 };
-
-  const fields = [
-    { id: "name", label: "Nombre", type: "text" },
-    // { id: "category", label: "Categoría", type: "select", options: categories.map((cat) => cat.name) }
+  const paymentMethods = [
+    { name: 'Ovo', balance: 'Rp 26.812.000' },
+    { name: 'Paypal', balance: '$ 421.980.00' },
+    { name: 'Dana', balance: 'Rp 22.921.000' },
   ];
 
   return (
     <div className='mx-auto bg-gray-100 p-4 rounded-lg shadow-md h-full'>
-      <div className={clsx("flex mb-4", centerAllWhenNoSales, normalWhenSales)}>
+      <div className={clsx("flex mb-4", { 'justify-center items-center h-full': sales.length === 0 && initialLoad, 'justify-around': sales.length > 0 })}>
         {loading ? (
           <p>Cargando...</p>
         ) : (
@@ -128,7 +128,10 @@ const SalesClient = ({ initialSales }: { initialSales: SaleDto[] }) => {
           </div>
         )}
       </div>
-      <ItemsList items={sales} title='' boxSize='small' cols='6' updatable={true} fields={fields}/>
+      <SalesSummary totalSales={sales.length} />
+      <RecentSales sales={sales} />
+      <PaymentMethods methods={paymentMethods} />
+      {/* <ItemsList items={sales} title='' boxSize='small' cols='6' updatable={true} fields={fields}/> */}
     </div>
   );
 }

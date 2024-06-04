@@ -35,7 +35,7 @@ export const saveSale = async (sale: SaleDto): Promise<SaleDto> => {
 
 // Método para obtener todos los productos
 export const getSales = async (search?: (string | null), 
-                               date?: (Date | null)): Promise<SaleDto[]> => {
+                               date?: (Date | null)): Promise<Page<SaleDto>> => {
   // console.log(page, size, search, date)
   try {
     const formattedDate = date ? date.toISOString().split('T')[0] : null;

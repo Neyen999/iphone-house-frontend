@@ -2,7 +2,7 @@ interface InputProps<T = string> {
   id?: string;
   value: any;
   onFocus?: (value: any) => void;
-  onChange: (value: any) => void;
+  onChange?: (value: any) => void;
   type?: 'text' | 'number' | 'email' | 'password' | 'select' | 'checkbox' | string;
   placeholder?: string;
   label?: string;
@@ -24,7 +24,9 @@ const Input = <T extends string | number>({
   fields
 }: InputProps<T>) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    onChange(e);
+    if (onChange !== undefined) {
+      onChange(e);
+    }
   };
 
   return (
@@ -36,12 +38,16 @@ const Input = <T extends string | number>({
       )}
       {type === "select" ? 
         <select
-          id="category"
+          id={id}
           value={value}
           onChange={handleChange}
           required
+          disabled={disabled}
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-          <option value="" disabled>{`${label === "Seleccione un Producto" ? "Seleccionar Producto" : "Seleccionar Categoria"} `}</option>
+          <option value="" disabled>
+            {/* {`${label === "Seleccione un Producto" ? "Seleccionar Producto" : "Seleccionar Categoria"} `} */}
+            {placeholder}
+          </option>
           {fields?.map((type) => (
             <option key={type} value={type}>{type}</option>
           ))}
@@ -56,7 +62,7 @@ const Input = <T extends string | number>({
           placeholder={placeholder}
           disabled={disabled}
           required={required}
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${disabled && 'opacity-50'}`}
         />
       }
     </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { editProduct, getProducts, saveProduct } from '@/lib/product/product.service';
+import { editProduct, getProducts, saveProduct, saveProductAndTester } from '@/lib/product/product.service';
 import AddProductForm from '@/app/components/products/AddProductForm';
 import ItemsList from '@/app/components/products/ItemsList';
 import { PlusCircleIcon } from '@heroicons/react/24/outline';
@@ -57,42 +57,41 @@ const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[]}) =
     setShowAddProductPopup(false);
   };
 
-  const fetchProducts = async () => {
-    try {
-      const productsData = await getProducts(searchQuery);
-      setProducts(productsData);
-
-      console.log(products);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      setLoading(false);
-    }
-  };
-
   const handleSubmit = async (formData: any) => {
     // Aquí puedes manejar la lógica para agregar el producto a la lista de productos
     try {
       const savedProduct = await saveProduct(formData);
-      console.log('Nuevo producto:', savedProduct);
+      console.log('Nuevo producto:', formData);
 
       setProducts([...products, savedProduct]);
       setShowAddProductPopup(false)
     } catch (error) {
       console.error('Error saving sale:', error);
     }
-    // products.push(formData);
+  };
+
+  const handleSubmitMultiple = async (formData: any) => {
+    // Aquí puedes manejar la lógica para agregar el producto a la lista de productos
+    try {
+      const savedProducts = await saveProductAndTester(formData);
+      console.log('Nuevos productos:', savedProducts);
+
+      setProducts((prevProducts) => [...prevProducts, ...savedProducts]);
+      setShowAddProductPopup(false)
+    } catch (error) {
+      console.error('Error saving sale:', error);
+    }
   };
 
   const handleEditProduct = async (formData: any) => {
     try {
       // Llamada a la API para actualizar el producto (comentada)
       const updatedProduct = await editProduct(formData);
-      console.log('Producto editado:', formData);
+      console.log('Producto editado:', updatedProduct);
   
       // Encuentra el índice del producto editado
       const updatedProducts = products.map((product) =>
-        product.id === formData.id ? formData : product
+        product.id === updatedProduct.id ? formData : product
       );
   
       // Actualiza el estado con el nuevo array de productos
@@ -158,6 +157,7 @@ const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[]}) =
                 categories={categories}
                 onClose={handleCloseAddProductPopup}
                 onSubmit={handleSubmit}
+                onSubmitMultiple={handleSubmitMultiple}
               />
             )}
           </div>

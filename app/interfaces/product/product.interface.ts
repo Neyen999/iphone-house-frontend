@@ -1,7 +1,7 @@
 interface ProductDto {
   id?: number,
   name: string;
-  category: CategoryDto;
+  category: CategoryDto | null;
   idealStock: number;
   initialCounterStock: number;
   initialRegisterStock: number;

@@ -33,6 +33,17 @@ export const saveProduct = async (product: ProductDto): Promise<ProductDto> => {
   }
 };
 
+// Método para guardar un producto
+export const saveProductAndTester = async (products: ProductDto[]): Promise<ProductDto[]> => {
+  try {
+    const response = await axiosInstance.post('/product/testerBulk', products);
+    return response.data;
+  } catch (error) {
+    console.error('Error saving product:', error);
+    throw error;
+  }
+};
+
 // Método para obtener todos los productos
 export const getProducts = async (search?: (string | null)): Promise<ProductDto[]> => {
   try {
