@@ -55,13 +55,13 @@ export const getCategories = async (): Promise<CategoryDto[]> => {
 //   }
 // };
 
-// // Método para editar un producto
-// export const editProduct = async (id: string, product: ProductDto): Promise<ProductDto> => {
-//   try {
-//     const response = await axiosInstance.put(`/product/${id}`, product);
-//     return response.data;
-//   } catch (error) {
-//     console.error(`Error editing product with id ${id}:`, error);
-//     throw error;
-//   }
-// };
+// Método para editar una categoria
+export const editCategory = async (id: number, request: CategoryDto): Promise<CategoryDto> => {
+  try {
+    const response = await axiosInstance.put(`/category/categories/${id}`, request);
+    return response.data;
+  } catch (error) {
+    console.error(`Error editing product with id ${id}:`, error);
+    throw error;
+  }
+};

@@ -9,6 +9,7 @@ interface SaleDto {
   totalPrice: number;
   totalChange: number;
   testerSale: boolean;
+  dateCreated?: Date;
 }
 
 interface ProductSaleDto {

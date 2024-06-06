@@ -34,13 +34,17 @@ export const saveSale = async (sale: SaleDto): Promise<SaleDto> => {
 };
 
 // Método para obtener todos los productos
-export const getSales = async (search?: (string | null), 
-                               date?: (Date | null)): Promise<Page<SaleDto>> => {
+export const getSales = async (page?: (number | null),
+                               size?: (number | null),
+                               search?: (string | null), 
+                               startDate?: (Date | null), 
+                               endDate?: (Date | null)): Promise<Page<SaleDto>> => {
   // console.log(page, size, search, date)
   try {
-    const formattedDate = date ? date.toISOString().split('T')[0] : null;
+    const formattedStartDate = startDate ? startDate.toISOString().split('T')[0] : null;
+    const formattedEndDate = endDate ? endDate.toISOString().split('T')[0] : null;
     const response = await axiosInstance.get('/sale/sales', {
-      params: { search, date: formattedDate }
+      params: { page, size, search, startDate: formattedStartDate, endDate: formattedEndDate }
     });
     return response.data;
   } catch (error) {

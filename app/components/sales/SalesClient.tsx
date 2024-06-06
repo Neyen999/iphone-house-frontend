@@ -9,24 +9,38 @@ import AddSaleForm from '@/app/components/sales/AddSaleForm';
 import TextField from '@mui/material/TextField';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers';
+// import { DatePicker } from '@mui/x-date-pickers';
 import RecentSales from './RecentSales';
 import PaymentMethods from './PaymentMethods';
 import SalesSummary from './SalesSummary';
+import { DatePicker } from '@mui/x-date-pickers';
+import dayjs, { Dayjs } from 'dayjs';
+import { Box, Button, Pagination, SelectChangeEvent } from '@mui/material';
+import PageSizeSelect from '../stock/PageSizeSelect';
 
-const SalesClient = ({ initialSales }: { initialSales: SaleDto[] }) => {
+const SalesClient = ({ initialSales }: { initialSales: Page<SaleDto> }) => {
   const [showAddSalePopup, setShowAddSalePopup] = useState(false);
-  const [sales, setSales] = useState<SaleDto[]>(initialSales);
+  const [sales, setSales] = useState<SaleDto[]>(initialSales.content);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  // const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
+  const [startDate, setStartDate] = useState<Dayjs | null>(null);
+  const [endDate, setEndDate] = useState<Dayjs | null>(null);
+  // Pagination
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(initialSales.totalPages);
 
   useEffect(() => {
     const fetchSales = async () => {
       try {
-        const salesData = await getSales(searchQuery, selectedDate);
+        const salesData = await getSales(page, size, searchQuery, 
+          startDate ? startDate.toDate() : null, 
+          endDate ? endDate.toDate() : null);
         setSales(salesData.content);
+        setTotalPages(salesData.totalPages);
         console.log("Inside here")
       } catch (error) {
         console.error('Error fetching sales:', error);
@@ -39,14 +53,26 @@ const SalesClient = ({ initialSales }: { initialSales: SaleDto[] }) => {
     } else {
       setInitialLoad(false);
     }
-  }, [searchQuery, selectedDate]);
+  }, [page, size, searchQuery, startDate, endDate]);
+
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+    setInitialLoad(false);
+    setPage(value - 1);
+  };
+
+  const handlePageSizeChange = (event: SelectChangeEvent<unknown>) => {
+    setInitialLoad(false);
+
+    setSize(event.target.value as number);
+    setPage(0);
+  };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
   };
 
   const handleDateChange = (date: Date | null) => {
-    setSelectedDate(date);
+    // setSelectedDate(date);
     setInitialLoad(false);
   };
 
@@ -70,11 +96,11 @@ const SalesClient = ({ initialSales }: { initialSales: SaleDto[] }) => {
     }
   };
 
-  const paymentMethods = [
-    { name: 'Ovo', balance: 'Rp 26.812.000' },
-    { name: 'Paypal', balance: '$ 421.980.00' },
-    { name: 'Dana', balance: 'Rp 22.921.000' },
-  ];
+  const handleClearFilter = () => {
+    setSearchQuery('');
+    setStartDate(null);
+    setEndDate(null);
+  };
 
   return (
     <div className='mx-auto bg-gray-100 p-4 rounded-lg shadow-md h-full'>
@@ -94,13 +120,36 @@ const SalesClient = ({ initialSales }: { initialSales: SaleDto[] }) => {
               />
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
-                  label="Seleccionar fecha"
-                  value={selectedDate}
-                  onChange={handleDateChange}
+                  label="Fecha desde"
+                  value={startDate}
+                  onChange={(newValue) => {
+                    setSelectedDate(newValue);
+                    setStartDate(newValue); // Convertir a Date si es necesario
+                    // setEndDate(null);
+                  }}
+                  sx={{ backgroundColor: 'white', borderRadius: 2, maxWidth: 200 }}
+                  format="YYYY-MM-DD"
+                />
+                <DatePicker
+                  label="Fecha hasta"
+                  value={endDate}
+                  onChange={(newValue) => {
+                    // setSelectedDate(newValue);
+                    // setE(newValue ? newValue.toDate() : null); // Convertir a Date si es necesario
+                    setEndDate(newValue);
+                  }}
                   sx={{ backgroundColor: 'white', borderRadius: 2, maxWidth: 200 }}
                   format="YYYY-MM-DD"
                 />
               </LocalizationProvider>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={handleClearFilter}
+                sx={{ backgroundColor: 'white', borderRadius: 2 }}
+              >
+                Limpiar Filtro
+              </Button>
             </div>
             <div className='flex-col'>
               <div className={`flex ${sales.length === 0 && initialLoad ? 'justify-center' : 'justify-start'}`}>
@@ -128,10 +177,15 @@ const SalesClient = ({ initialSales }: { initialSales: SaleDto[] }) => {
           </div>
         )}
       </div>
-      <SalesSummary totalSales={sales.length} />
-      <RecentSales sales={sales} />
-      <PaymentMethods methods={paymentMethods} />
-      {/* <ItemsList items={sales} title='' boxSize='small' cols='6' updatable={true} fields={fields}/> */}
+      <SalesSummary startDate={startDate ? startDate.toDate() : null} 
+                    endDate={endDate ? endDate.toDate() : null} />
+      <>
+        <RecentSales sales={sales} />
+        <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
+          <PageSizeSelect pageSize={size} handlePageSizeChange={handlePageSizeChange} />
+          <Pagination count={totalPages} page={page} onChange={handlePageChange} />
+        </Box>
+      </>
     </div>
   );
 }

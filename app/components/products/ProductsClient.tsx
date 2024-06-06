@@ -1,21 +1,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { editProduct, getProducts, saveProduct, saveProductAndTester } from '@/lib/product/product.service';
+import { deleteProduct, editProduct, getProducts, saveProduct, saveProductAndTester } from '@/lib/product/product.service';
 import AddProductForm from '@/app/components/products/AddProductForm';
 import ItemsList from '@/app/components/products/ItemsList';
-import { PlusCircleIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, PlusCircleIcon } from '@heroicons/react/24/outline';
 import TextField from '@mui/material/TextField';
 import clsx from 'clsx';
-import { getCategories } from '@/lib/product/category.service';
+import { editCategory, getCategories, saveCategory } from '@/lib/product/category.service';
+import CategoriesClient from './CategoriesClient';
+import EditItemForm from './EditItemForm';
 
-const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[]}) => {
+const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[] }) => {
   const [showAddProductPopup, setShowAddProductPopup] = useState(false);
   const [products, setProducts] = useState<ProductDto[]>(initialProducts);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
   const [categories, setCategories] = useState<CategoryDto[]>([]);
+  const [newCategory, setNewCategory] = useState('');
+  const [isEditingCategory, setIsEditingCategory] = useState<boolean>(false);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryDto | null>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -104,9 +109,45 @@ const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[]}) =
     }
   };
 
-  const handleDeleteProduct = (id: number) => {
-
+  const handleDeleteProduct = async (name: string) => {
+    await deleteProduct(name);
   }
+
+  const handleAddCategory = async () => {
+    if (newCategory.trim() === '') return;
+    try {
+      const addedCategory = await saveCategory({ name: newCategory });
+      setCategories([...categories, addedCategory]);
+      setNewCategory('');
+    } catch (error) {
+      console.error('Error adding category:', error);
+    }
+  };
+
+  const handleEditCategory = async (formData: any) => {
+    try {
+      const updatedCategory = await editCategory(formData.id, formData);
+      console.log('Categoría editada:', updatedCategory);
+  
+      const updatedCategories = categories.map((category) =>
+        category.id === updatedCategory.id ? updatedCategory : category
+      );
+  
+      setCategories(updatedCategories);
+    } catch (error) {
+      console.error('Error editando la categoría:', error);
+    }
+  };
+
+  const handleEditCategoryClick = (category: CategoryDto) => {
+    setSelectedCategory(category);
+    setIsEditingCategory(true);
+  };
+  
+  const handleCloseCategoryEdit = () => {
+    setIsEditingCategory(false);
+    setSelectedCategory(null);
+  };
 
   const centerAllWhenNoProducts = { "justify-center items-center h-full": products.length === 0 && initialLoad };
   const normalWhenProducts = { "justify-around": products.length > 0 };
@@ -117,59 +158,93 @@ const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[]}) =
   ];
 
   return (
-    <div className='mx-auto bg-gray-100 p-4 rounded-lg shadow-md h-full'>    
-      <div className={clsx("flex mb-4", 
-        centerAllWhenNoProducts, 
-        normalWhenProducts)}>
-        {
-          (loading && products.length == 0) 
-          ? <p>Cargando...</p>
-          : 
-          <div className="relative flex-grow">
-            <div className='flex-col'>
-              <div className="flex mb-4 gap-2">
-                <TextField
-                  label="Buscar"
-                  variant="outlined"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  fullWidth
-                  sx={{ backgroundColor: 'white', borderRadius: 2, width: '50%', maxWidth: 500, display: `${initialLoad && products.length === 0 ? 'none' : 'block'}`}}
-                />
+      <div className='flex h-full'>
+        <div className='mx-auto bg-gray-100 p-4 rounded-lg shadow-md h-full flex-grow'>
+          <div className={clsx("flex mb-4", centerAllWhenNoProducts, normalWhenProducts)}>
+            {loading && products.length === 0 ? (
+              <p>Cargando...</p>
+            ) : (
+              <div className="relative flex-grow">
+                <div className='flex-col'>
+                  <div className="flex mb-4 gap-2">
+                    <TextField
+                      label="Buscar"
+                      variant="outlined"
+                      value={searchQuery}
+                      onChange={handleSearchChange}
+                      fullWidth
+                      sx={{ backgroundColor: 'white', borderRadius: 2, width: '50%', maxWidth: 500, display: `${initialLoad && products.length === 0 ? 'none' : 'block'}` }}
+                    />
+                  </div>
+                  <div className={`flex ${products.length > 0 ? 'justify-start' : 'justify-center'}`}>
+                    <button
+                      className="bg-blue-500 text-white font-semibold py-2 px-2 rounded flex items-center justify-left"
+                      onClick={handleAddProductClick}
+                    >
+                      <PlusCircleIcon className="h-5 w-5 mr-1 md:mr-2" />
+                      <span className="hidden md:inline">Añadir Producto</span>
+                    </button>
+                  </div>
+                  {products.length === 0 && (
+                    <p className='flex justify-center'>No tenes ningún producto, ¡intenta añadir uno!</p>
+                  )}
+                </div>
+                {showAddProductPopup && (
+                  <AddProductForm
+                    categories={categories}
+                    onClose={handleCloseAddProductPopup}
+                    onSubmit={handleSubmit}
+                    onSubmitMultiple={handleSubmitMultiple}
+                  />
+                )}
               </div>
-              <div className={`flex ${products.length > 0 ? 'justify-start' : 'justify-center'}`}>
-                {/* Cambiado a justify-start para alinear a la izquierda */}
-                <button
-                  className="bg-blue-500 text-white font-semibold py-2 px-2 rounded flex items-center justify-left" 
-                  onClick={handleAddProductClick}
-                >
-                  <PlusCircleIcon className="h-5 w-5 mr-1 md:mr-2" /> {/* Ajustar el tamaño del ícono */}
-                  <span className="hidden md:inline">Añadir Producto</span>
-                </button>
-              </div>
-              {
-                products.length == 0 && 
-                <p className='flex justify-center'>No tenes ningún producto, ¡intenta añadir uno!</p>
-              }
+            )}
+          </div>
+          {products.length > 0 && categories.length > 0 && (
+            <ItemsList items={products} title='' cols='6' updatable={true}
+              fields={fields} onUpdate={handleEditProduct} onDelete={handleDeleteProduct} />
+          )} 
+        </div>
+        <div className="w-1/4 pl-4">
+          <div className="bg-white p-4 rounded-lg shadow-md overflow-y-auto">
+            <h2 className="text-2xl font-bold mb-4">Categorías</h2>
+            <div className="mb-4">
+              <input
+                type="text"
+                className="border p-2 w-full"
+                placeholder="Nueva categoría"
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+              />
+              <button
+                className={`mt-2 w-full rounded p-2 text-white ${newCategory.trim() === '' ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-500'}`}
+                disabled={newCategory.trim() === ''}
+                onClick={handleAddCategory}
+              >
+                Añadir Categoría
+              </button>
             </div>
-            {showAddProductPopup && (
-              <AddProductForm
-                categories={categories}
-                onClose={handleCloseAddProductPopup}
-                onSubmit={handleSubmit}
-                onSubmitMultiple={handleSubmitMultiple}
+            <ul className="list-inside">
+              {categories.map((category) => (
+                <li key={category.id} className="p-2 border-b flex justify-between items-center">
+                  <span>{category.name}</span>
+                  <div className="flex space-x-2">
+                    <PencilIcon className="h-5 w-5 text-blue-500 cursor-pointer" onClick={() => handleEditCategoryClick(category)} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+            {isEditingCategory && selectedCategory && (
+              <EditItemForm
+                item={selectedCategory}
+                fields={[{ id: "name", label: "Nombre", type: "text" }]}
+                onClose={handleCloseCategoryEdit}
+                onSubmit={handleEditCategory}
               />
             )}
           </div>
-        }
-        
+        </div>
       </div>
-      {products.length > 0 
-      && categories.length > 0 
-      ? <ItemsList items={products} title='' boxSize='small' cols='6' updatable={true} 
-      fields={fields} onUpdate={handleEditProduct}/>
-      : ''}
-    </div>
   );
 };
 
