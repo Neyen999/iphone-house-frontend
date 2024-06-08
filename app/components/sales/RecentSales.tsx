@@ -1,27 +1,53 @@
+import { useState } from "react";
+import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import EditItemForm from "../products/EditItemForm";
+import DeleteWarning from "../products/DeleteWarning";
+import { deleteSale } from "@/lib/sale/sale.service";
+
 const RecentSales = ({ sales }: { sales: SaleDto[] }) => {
-  console.log("Recent sales")
-  console.log(sales)
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [selectedSale, setSelectedSale] = useState<SaleDto | null>(null);
+  const [salesList, setSalesList] = useState<SaleDto[]>(sales);
 
-  // const format = (date: Date) => {
-  //   console.log(date)
-  //   // Obtener el día, mes y año
-  //   let day: any = date.getDate();
-  //   let month: any = date.getMonth() + 1; // Los meses en JavaScript son base 0, por lo que se debe sumar 1
-  //   const year = date.getFullYear();
+  const handleEditSaleClick = (sale: SaleDto) => {
+    console.log(sale);
+    setSelectedSale(sale);
+    setIsEditing(true);
+  };
 
-  //   // Asegurar que el día y el mes tengan dos dígitos
-  //   if (day < 10) {
-  //     day = '0' + day;
-  //   }
+  const handleDeleteSaleClick = (sale: SaleDto) => {
+    setSelectedSale(sale);
+    setIsDeleting(true);
+  };
 
-  //   if (month < 10) {
-  //     month = '0' + month;
-  //   }
-  //   // Formatear la fecha
-  //   const formattedDate = `${day}-${month}-${year}`;
-    
-  //   return formattedDate
-  // }
+  const handleEditSubmit = (formData: any) => {
+    // Implement your update logic here
+    console.log("Edit sale", formData);
+    setIsEditing(false);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (selectedSale) {
+      // Implement your delete logic here
+      console.log("Delete sale", selectedSale);
+      const deletedSale = await deleteSale(selectedSale.id);
+      // Remove the sale from the state
+      setSalesList(salesList.filter(sale => sale.id !== deletedSale.id));
+      setIsDeleting(false);
+      setSelectedSale(null);
+    }
+  };
+
+  const handleCloseEditForm = () => {
+    setIsEditing(false);
+    setSelectedSale(null);
+  };
+
+  const handleCloseDeleteWarning = () => {
+    setIsDeleting(false);
+    setSelectedSale(null);
+  };
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-md mt-4">
@@ -53,10 +79,13 @@ const RecentSales = ({ sales }: { sales: SaleDto[] }) => {
             <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider  text-right">
               Pago total
             </th>
+            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              {/* Acciones */}
+            </th>
           </tr>
         </thead>
         <tbody>
-          {sales.map((sale) => (
+          {salesList.map((sale) => (
             <tr key={sale.id}>
               <td className="px-5 py-2 border-b border-gray-200 bg-white text-sm text-right">{sale.id}</td>
               <td className="px-5 py-2 border-b border-gray-200 bg-white text-sm">{sale.dateCreated ? sale.dateCreated.toString() : '-'}</td>
@@ -68,10 +97,38 @@ const RecentSales = ({ sales }: { sales: SaleDto[] }) => {
               <td className="px-5 py-2 border-b border-gray-200 bg-white text-sm text-right">${sale.userPayment}</td>
               <td className="px-5 py-2 border-b border-gray-200 bg-white text-sm text-right">${sale.totalChange}</td>
               <td className="px-5 py-2 border-b border-gray-200 bg-white text-sm text-right">${sale.totalPrice}</td>
+              <td className="px-5 py-2 border-b border-gray-200 bg-white text-sm text-center">
+                <PencilIcon className="h-5 w-5 text-blue-500 cursor-pointer mr-2" onClick={() => handleEditSaleClick(sale)} />
+                <TrashIcon className="h-5 w-5 text-red-500 cursor-pointer" onClick={() => handleDeleteSaleClick(sale)} />
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {isEditing && selectedSale && (
+        <EditItemForm
+          item={selectedSale}
+          fields={[
+            { id: "userName", label: "Cliente", type: "text" },
+            { id: "userPhoneNumber", label: "Contacto", type: "text" },
+            { id: "userPayment", label: "Abonado por el cliente", type: "number" },
+            { id: "totalChange", label: "Vuelto", type: "number" },
+            { id: "totalPrice", label: "Pago total", type: "number" },
+            // { id: "productSales", label: "", type: "select"}
+          ]}
+          onClose={handleCloseEditForm}
+          onSubmit={handleEditSubmit}
+        />
+      )}
+
+      {isDeleting && selectedSale && (
+        <DeleteWarning
+          onClose={handleCloseDeleteWarning}
+          onDelete={handleDeleteConfirm}
+          message="¿Estás seguro de que quieres eliminar esta venta?"
+        />
+      )}
     </div>
   );
 };

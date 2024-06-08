@@ -53,24 +53,24 @@ export const getSales = async (page?: (number | null),
   }
 };
 
-// // Método para obtener un solo producto por ID
-// export const getProductById = async (id: string): Promise<ProductDto> => {
-//   try {
-//     const response = await axiosInstance.get(`/product/${id}`);
-//     return response.data;
-//   } catch (error) {
-//     console.error(`Error fetching product with id ${id}:`, error);
-//     throw error;
-//   }
-// };
-
 // Método para editar un producto
-export const editSale = async (id: string, stock: SaleDto): Promise<SaleDto> => {
+export const editSale = async (id: number, stock: SaleDto): Promise<SaleDto> => {
   try {
-    const response = await axiosInstance.put(`/stock/stocks/${id}`, stock);
+    const response = await axiosInstance.put(`/sale/sales/${id}`, stock);
     return response.data;
   } catch (error) {
     console.error(`Error editing stock with id ${id}:`, error);
+    throw error;
+  }
+};
+
+// Método para editar un producto
+export const deleteSale = async (id: number): Promise<SaleDto> => {
+  try {
+    const response = await axiosInstance.delete(`/sale/sales/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error deleting sale with id ${id}:`, error);
     throw error;
   }
 };

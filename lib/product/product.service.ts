@@ -80,10 +80,10 @@ export const editProduct = async (product: ProductDto): Promise<ProductDto> => {
 };
 
 // Método para eliminar un producto
-export const deleteProduct = async (name: string): Promise<null> => {
+export const deleteProduct = async (name: string): Promise<ProductDto[]> => {
   try {
     const response = await axiosInstance.delete(`/product/products/${name}`);
-    return null;
+    return response.data;
   } catch (error) {
     console.error(`Error deleting product with name ${name}:`, error);
     throw error;

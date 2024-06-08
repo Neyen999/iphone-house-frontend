@@ -13,7 +13,7 @@ interface ItemsListProps {
   cols: string,
   updatable?: boolean,
   onUpdate?: (data: any) => void;
-  onDelete?: (name: string) => void;
+  onDelete?: (item: any) => void;
   fields: { id: string; label: string; type: string; options?: any[] }[];
 }
 
@@ -46,7 +46,7 @@ const ItemsList = ({ items, title, cols, updatable, onUpdate, onDelete, fields }
 
   const handleDeleteConfirm = () => {
     if (onDelete) {
-      onDelete(selectedItem.name);
+      onDelete(selectedItem);
     }
     setIsOpenWarning(false);
   };

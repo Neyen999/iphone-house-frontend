@@ -109,10 +109,21 @@ const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[] }) 
     }
   };
 
-  const handleDeleteProduct = async (name: string) => {
-    await deleteProduct(name);
-  }
-
+  const handleDeleteProduct = async (item: any) => {
+    try {
+      console.log(item);
+      const deletedProducts = await deleteProduct(item.name);
+      console.log(deletedProducts);
+  
+      // Filtrar los productos eliminados del estado actual
+      setProducts((prevProducts) => 
+        prevProducts.filter((product) => !deletedProducts.some((deleted) => deleted.id === product.id))
+      );
+    } catch (error) {
+      console.error(`Error deleting product with name ${item.name}:`, error);
+    }
+  };
+  
   const handleAddCategory = async () => {
     if (newCategory.trim() === '') return;
     try {

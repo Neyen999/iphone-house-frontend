@@ -16,12 +16,21 @@ const EditItemForm = ({ item, fields, onClose, onSubmit }: EditItemFormProps) =>
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
+    let newValue: any = value;
+    
+    // Check the field type and convert value if necessary
+    const field = fields.find(f => f.id === id);
+    if (field?.type === 'number') {
+      newValue = parseFloat(value);
+    }
+
+
     if (!hasChangedAField) {
       setHasChangeAField(true);
     }
     setFormData((prevFormData: any) => ({
       ...prevFormData,
-      [id]: resolveValue(id, value) || value ,
+      [id]: resolveValue(id, newValue) || newValue ,
     }));
   };
 
@@ -33,6 +42,7 @@ const EditItemForm = ({ item, fields, onClose, onSubmit }: EditItemFormProps) =>
       // console.log(category)
       return category;
     }
+    // console.log(typeof incomingValue)
     return incomingValue;
   }
 
