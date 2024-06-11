@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { obtainCookie } from '../auth.server';
+import { obtainCookie } from '../auth/auth.server';
 
 const API_BASE_URL = 'http://localhost:8080/api/v1';
 

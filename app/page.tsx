@@ -1,15 +1,23 @@
-"use client";
-import { useEffect } from "react";
+import TopSellingProductsProvider from "@/components/server-components/inicio/TopSellingProductProvider";
+import LowStockProductsProvider from "@/components/server-components/inicio/LowStockProductsProvider";
+import HomeClient from "@/components/inicio/HomeClient";
+import { isAuthenticated, isTokenValid } from '@/lib/auth/auth.server';
 
-export default function Home() {
-  useEffect(() => {
 
-    console.log("HOME RENDER");
-  }, [])
+const Home = async () => {
+  const isValidToken = await isTokenValid()
+
+  if (!isValidToken) {
+    return null;
+  }
+
+  const { topSellingProducts } = await TopSellingProductsProvider();
+  const { lowStockProducts } = await LowStockProductsProvider();
+
   return (
-    <div>
-      <h1>Welcome to the Home Page</h1>
-      {/* Your home page content */}
-    </div>
-  );
+    // <h1>Home</h1>
+    <HomeClient topSellingProducts={topSellingProducts} lowStockProducts={lowStockProducts} />
+  )
 }
+
+export default Home;

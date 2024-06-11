@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { saveUserRoleCookie, loginUser } from '@/lib/auth.service';
-import { useAuth } from '../context/context';
+import { saveUserRoleCookie, loginUser } from '@/lib/auth/auth.service';
+import { useAuth } from '@/context/context';
+import Input from '@/components/input/Input';
 
 const Login = () => {
   const router = useRouter();
@@ -11,10 +12,29 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loginStatus, setLoginStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
   const { setIsLoggedIn } = useAuth();
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setUsername(value);
+
+    // Simple email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(value)) {
+      setEmailError('Formato de email incorrecto');
+    } else {
+      setEmailError('');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (emailError) {
+      setError('Corrija los errores antes de continuar.');
+      return;
+    }
 
     setLoginStatus('idle');
     setError('');
@@ -29,40 +49,40 @@ const Login = () => {
 
       setTimeout(() => {
         setIsLoggedIn(true);
+        router.push('/');
       }, 1000);
     } catch (error) {
       setLoginStatus('error');
       setError('Usuario o contraseña incorrectos.');
     }
-    router.push('/inicio');
   };
 
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center h-full min-h-full bg-gray-100">
       <div className="w-full max-w-md bg-white p-8 rounded shadow">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-              Usuario
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="username"
-              type="text"
+            <Input
+              id='username'
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={handleEmailChange}
+              placeholder='Ingrese su correo electrónico'
+              type='email'
+              label='Correo electrónico'
+              required
+              error={emailError}
             />
           </div>
           <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-              Contraseña
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-              id="password"
-              type="password"
+            <Input
+              id='password'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder='Ingrese su contraseña'
+              type='password'
+              label='Contraseña'
+              required
             />
           </div>
           {loginStatus === 'error' && (

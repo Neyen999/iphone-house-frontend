@@ -22,31 +22,24 @@ axiosInstance.interceptors.request.use(async (config) => {
   return Promise.reject(error);
 });
 
-// // Método para guardar un producto
-// export const saveSto = async (product: ProductDto): Promise<ProductDto> => {
-//   try {
-//     const response = await axiosInstance.post('/product', product);
-//     return response.data;
-//   } catch (error) {
-//     console.error('Error saving product:', error);
-//     throw error;
-//   }
-// };
-
-// Método para obtener todos los productos
-export const getStocks = async (page?: number, 
-                                size?: number, 
-                                search?: (string | null), 
-                                date?: (Date | null)): Promise<Page<StockDto>> => {
-  console.log(page, size, search, date)
+// Método para guardar un producto
+export const saveCategory = async (category: CategoryDto): Promise<CategoryDto> => {
   try {
-    const formattedDate = date ? date.toISOString().split('T')[0] : null;
-    const response = await axiosInstance.get('/stock/stocks', {
-      params: { page, size, search, date: formattedDate }
-    });
+    const response = await axiosInstance.post('/category', category);
     return response.data;
   } catch (error) {
-    console.error('Error fetching stocks:', error);
+    console.error('Error saving category:', error);
+    throw error;
+  }
+};
+
+// Método para obtener todos los productos
+export const getCategories = async (): Promise<CategoryDto[]> => {
+  try {
+    const response = await axiosInstance.get('/category/categories');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching products:', error);
     throw error;
   }
 };
@@ -62,13 +55,13 @@ export const getStocks = async (page?: number,
 //   }
 // };
 
-// Método para editar un producto
-export const editStock = async (id: string, stock: StockDto): Promise<StockDto> => {
+// Método para editar una categoria
+export const editCategory = async (id: number, request: CategoryDto): Promise<CategoryDto> => {
   try {
-    const response = await axiosInstance.put(`/stock/stocks/${id}`, stock);
+    const response = await axiosInstance.put(`/category/categories/${id}`, request);
     return response.data;
   } catch (error) {
-    console.error(`Error editing stock with id ${id}:`, error);
+    console.error(`Error editing product with id ${id}:`, error);
     throw error;
   }
 };
