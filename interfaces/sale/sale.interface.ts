@@ -10,6 +10,7 @@ interface SaleDto {
   totalChange: number;
   testerSale: boolean;
   dateCreated?: Date;
+  saleCount: number;
 }
 
 interface ProductSaleDto {

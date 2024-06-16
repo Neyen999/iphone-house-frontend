@@ -5,9 +5,10 @@ import { getSales } from '@/lib/sale/sale.service';
 interface SalesSummaryProps {
   startDate: Date | null;
   endDate: Date | null;
+  incomingSales: SaleDto[];
 }
 
-const SalesSummary: React.FC<SalesSummaryProps> = ({ startDate, endDate }) => {
+const SalesSummary: React.FC<SalesSummaryProps> = ({ startDate, endDate, incomingSales }) => {
   const [sales, setSales] = useState<SaleDto[]>([]);
   const [totalRevenue, setTotalRevenue] = useState<number>(0);
   const [totalChange, setTotalChange] = useState<number>(0);
@@ -28,7 +29,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({ startDate, endDate }) => {
     };
 
     fetchSales();
-  }, [startDate, endDate]);
+  }, [startDate, endDate, incomingSales]);
 
   useEffect(() => {
     const revenue = sales.reduce((acc, sale) => acc + sale.totalPrice, 0);

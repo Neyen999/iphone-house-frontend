@@ -11,6 +11,7 @@ import { editCategory, getCategories, saveCategory } from '@/lib/category/catego
 import EditItemForm from './EditItemForm';
 
 const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[] }) => {
+  // console.log(initialProducts)
   const [showAddProductPopup, setShowAddProductPopup] = useState(false);
   const [products, setProducts] = useState<ProductDto[]>(initialProducts);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -22,24 +23,12 @@ const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[] }) 
   const [selectedCategory, setSelectedCategory] = useState<CategoryDto | null>(null);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      // setLoading(true);
-      try {
-        const productsData = await getProducts(searchQuery);
-        setProducts(productsData);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-        setLoading(false);
-      }
-    };
-
     if (!initialLoad) {
       fetchProducts();
     } else {
       setInitialLoad(false);
     }
-  }, [searchQuery]);
+  }, [searchQuery, initialProducts]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -48,6 +37,21 @@ const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[] }) 
     }
     fetchCategories();
   }, [])
+
+  const fetchProducts = async () => {
+    // setLoading(true);
+    try {
+      const productsData = await getProducts(searchQuery);
+      setProducts(productsData);
+      setLoading(false);
+
+      console.log("Products data: ")
+      console.log(productsData)
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setLoading(false);
+    }
+  };
   
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
@@ -68,6 +72,8 @@ const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[] }) 
 
       setProducts([...products, savedProduct]);
       setShowAddProductPopup(false)
+
+      await fetchProducts();
     } catch (error) {
     }
   };
@@ -79,6 +85,7 @@ const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[] }) 
 
       setProducts((prevProducts) => [...prevProducts, ...savedProducts]);
       setShowAddProductPopup(false)
+      await fetchProducts()
     } catch (error) {
       console.error('Error saving sale:', error);
     }
@@ -112,6 +119,7 @@ const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[] }) 
       setProducts((prevProducts) => 
         prevProducts.filter((product) => !deletedProducts.some((deleted) => deleted.id === product.id))
       );
+      await fetchProducts();
     } catch (error) {
     }
   };
@@ -160,7 +168,7 @@ const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[] }) 
 
   return (
       <div className='flex h-full'>
-        <div className='mx-auto bg-gray-100 p-4 rounded-lg shadow-md h-full flex-grow'>
+        <div className='mx-auto bg-gray-100 p-4 rounded-lg shadow-md h-full flex-grow overflow-y-auto'>
           <div className={clsx("flex mb-4", centerAllWhenNoProducts, normalWhenProducts)}>
             {loading && products.length === 0 ? (
               <p>Cargando...</p>

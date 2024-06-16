@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import SecondPhoto from "@/assets/Default.jpg";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import EditItemForm from "./EditItemForm";
 import DeleteWarning from "./DeleteWarning";
+import Products from "@/app/productos/page";
 
 interface ItemsListProps {
   items: any[], // Cambia el nombre de products a items y permite cualquier tipo
@@ -22,6 +23,10 @@ const ItemsList = ({ items, title, cols, updatable, onUpdate, onDelete, fields }
   const [isOpenWarning, setIsOpenWarning] = useState<boolean>(false);
   const [activeModal, setActiveModal] = useState(null);
   const [selectedItem, setSelectedItem] = useState<any>(null);
+
+  useEffect(() => {
+
+  }, [items])
 
   const handleEditClick = (item: any) => {
     setSelectedItem(item);

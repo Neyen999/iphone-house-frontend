@@ -31,7 +31,8 @@ export const createdSale = (
     userPayment,
     totalPrice,
     totalChange,
-    testerSale
+    testerSale,
+    saleCount: 0
   };
 };
 

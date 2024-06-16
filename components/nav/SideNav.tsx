@@ -20,15 +20,16 @@ const SideNav = () => {
       <div className="flex h-full flex-col px-3 py-4 md:px-2">
         <Link
           className="mb-2 flex h-20 items-center justify-center rounded-md bg-gray-700 p-4 md:h-40"
-          href="/"
+          href="/productos"
         >
           <div className="relative h-full w-full flex items-center justify-center">
             <Image src={Logo} alt="logo" className="object-contain" fill />
           </div>
         </Link>
         <div className="flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2">
-          <NavLinks />
-          <div className="hidden h-auto w-full grow rounded-md bg-gray-50 md:block"></div>
+          <div className="hidden h-auto w-full grow rounded-md bg-gray-50 md:block">
+            <NavLinks />
+          </div>
           <form>
             <button
               onClick={(e) => { e.preventDefault(); handleLogout(); }}

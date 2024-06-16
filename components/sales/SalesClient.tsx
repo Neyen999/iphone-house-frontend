@@ -171,7 +171,8 @@ const SalesClient = ({ initialSales }: { initialSales: Page<SaleDto> }) => {
         )}
       </div>
       <SalesSummary startDate={startDate ? startDate.toDate() : null} 
-                    endDate={endDate ? endDate.toDate() : null} />
+                    endDate={endDate ? endDate.toDate() : null} 
+                    incomingSales={sales}/>
       <>
         <RecentSales sales={sales} />
         <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>

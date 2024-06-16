@@ -90,7 +90,7 @@ const RecentSales = ({ sales }: { sales: SaleDto[] }) => {
         <tbody>
           {salesList.map((sale) => (
             <tr key={sale.id}>
-              <td className="px-5 py-2 border-b border-gray-200 bg-white text-sm text-right">{sale.id}</td>
+              <td className="px-5 py-2 border-b border-gray-200 bg-white text-sm text-right">{sale.saleCount}</td>
               <td className="px-5 py-2 border-b border-gray-200 bg-white text-sm">{sale.dateCreated ? sale.dateCreated.toString() : '-'}</td>
               <td className="px-5 py-2 border-b border-gray-200 bg-white text-sm">
                 {sale.productSales.map((prodSale) => prodSale.product.name).join(", ")}

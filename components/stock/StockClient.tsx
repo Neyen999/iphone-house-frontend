@@ -35,12 +35,12 @@ const StockClient = ({ initialStocks } : { initialStocks: Page<StockDto> }) => {
       setTotalPages(response.totalPages);
     };
 
-    if (!initialLoad) {
+    // if (!initialLoad) {
       fetchData();
-    } else {
+    // } else {
       setInitialLoad(false);
-    }
-  }, [page, size, searchQuery, selectedDate]);
+    // }
+  }, [page, size, searchQuery, selectedDate, initialStocks]);
 
   
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
