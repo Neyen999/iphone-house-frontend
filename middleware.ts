@@ -1,52 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
-// import { cookies } from 'next/headers';
-// import { isTokenValid } from './lib/auth.service';
-import { isAuthenticated, isTokenValid } from './lib/auth.server';
-import { cookies } from 'next/headers';
-// import { removeTokenIfExists } from './app/actions/removeCookie.server';
-// import { isTokenValid } from './lib/auth.service';
-
+import { isAuthenticated, isTokenValid } from './lib/auth/auth.server';
 
 export default async function middleware(req: NextRequest) {
-  const url = req.nextUrl.clone();
-  // Check if the user is authenticated
-  
-  // Validation
-  const isAuth = await isAuthenticated();
-  const isValid = await isTokenValid();
 
-  if (!isAuth || !isValid) {
-    url.pathname = '/login';
+  const url = req.nextUrl.clone();
+  const loginPath = '/login';
+  const homePath = '/productos'; // Adjust this to your desired home path
+
+  const isAuth = await isAuthenticated();
+  const { isValid } = await isTokenValid();
+
+  // If the user is trying to access the login page and they are authenticated and the token is valid, redirect them to the home page
+  if ((url.pathname === loginPath && isAuth) || (url.pathname === '/' && isAuth)) {
+    url.pathname = homePath;
     return NextResponse.redirect(url);
   }
 
-  // validate roles
-  // if (req.cookies.get("userRole") !== null) {
-  //   // const { roles } = req.cookies.get("user")?.value
-  // }
+  // If the user is not authenticated or the token is not valid, redirect them to the login page
+  if ((!isAuth && !isValid) && url.pathname !== loginPath) {
+    url.pathname = loginPath;
+    return NextResponse.redirect(url);
+  }
 
-  // req.
-
+  // Continue with the request
   return NextResponse.next();
 }
 
-// export const validateToken = async () => {
-//   try {
-//     const token = getTokenFromCookie();
-//     const response = await axios.post(`${API_BASE_URL}/auth/validateJwt?token=${token}`);
-//     return response.data;
-//   } catch (error) {
-//     console.error('Error validating token:', error);
-//     throw error;
-//   }
-// };
-
-// const getTokenFromCookie = () => {
-//   const token = cookies().get('token');
-//   return token;
-// };
-
 export const config = {
-  matcher: ['/'],
-  exclude: ['/login'],
+  matcher: ['/', '/productos', '/ventas', '/stock', '/perfil', '/login'],
+  // exclude: ['/login'],
 };

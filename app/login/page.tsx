@@ -2,71 +2,90 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getLoggedUser, loginUser } from '@/lib/auth.service';
+import {
+  //  saveUserRoleCookie, 
+  loginUser } from '@/lib/auth/auth.service';
+import { useAuth } from '@/context/context';
+import Input from '@/components/input/Input';
 
 const Login = () => {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loginStatus, setLoginStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const { setIsLoggedIn } = useAuth();
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setUsername(value);
+
+    // Simple email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(value)) {
+      setEmailError('Formato de email incorrecto');
+    } else {
+      setEmailError('');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (emailError) {
+      setError('Corrija los errores antes de continuar.');
+      return;
+    }
+
     setLoginStatus('idle');
-    setErrorMessage('');
+    setError('');
 
     const request: LoginRequest = { username, password };
 
     try {
       await loginUser(request);
       setLoginStatus('success');
+      // await saveUserRoleCookie();
 
-      const loggedUser = await getLoggedUser();
-
-      // Simulate a delay of 1 second before redirecting
-      setTimeout(() => {
-        router.push('/');
-      }, 1000);
-      // router.push('/')
+      setIsLoggedIn(true);
+      router.push('/');
     } catch (error) {
-      // console.error('Login error:', error);
       setLoginStatus('error');
-      setErrorMessage('Usuario o contraseña incorrectos.');
+      setError('Usuario o contraseña incorrectos.');
     }
   };
 
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center h-full min-h-full bg-gray-100">
       <div className="w-full max-w-md bg-white p-8 rounded shadow">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-              Usuario
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="username"
-              type="text"
+            <Input
+              id='username'
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={handleEmailChange}
+              placeholder='Ingrese su correo electrónico'
+              type='email'
+              label='Correo electrónico'
+              required
+              error={emailError}
             />
           </div>
           <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-              Contraseña
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-              id="password"
-              type="password"
+            <Input
+              id='password'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder='Ingrese su contraseña'
+              type='password'
+              label='Contraseña'
+              required
             />
           </div>
           {loginStatus === 'error' && (
-            <div className="mb-4 text-red-500 font-bold">{errorMessage}</div>
+            <div className="mb-4 text-red-500 font-bold">{error}</div>
           )}
           <div className="flex items-center justify-between">
             <button
