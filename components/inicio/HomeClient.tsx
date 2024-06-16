@@ -7,7 +7,7 @@ import { useEffect } from "react";
 const HomeClient = ({ topSellingProducts, lowStockProducts }: 
   { topSellingProducts: ProductDto[], lowStockProducts: StockDto[] }) => {
 
-  const { isLoading, isTokenExpired } = useAuth();
+  const { isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -18,25 +18,14 @@ const HomeClient = ({ topSellingProducts, lowStockProducts }:
   }
 
   return (
-    <div className="homepage-container grid grid-cols-12 gap-4 p-4">
+    <div className="homepage-container flex flex-col gap-4 p-4">
       {/* Sección de Más Vendidos */}
-      <div className="col-span-12 md:col-span-8 bg-white rounded-lg shadow-md">
+      <div className="w-full bg-white rounded-lg shadow-md p-4">
         <TopSellingProductsClient initialProducts={topSellingProducts} />
-      </div>
-
-      {/* Sección de Próximos a quedarse sin stock */}
-      <div className="col-span-12 md:col-span-4 bg-white rounded-lg shadow-md">
+        <hr className="border-gray-300 my-4" />
         <LowStockProductsClient stocks={lowStockProducts} />
-      </div>
 
-      {/* Sección de Resumen de Ventas */}
-      {/* <div className="col-span-12 bg-white rounded-lg shadow-md mt-4">
-        <SalesSummary />
-        
-      </div> */}
-      {/* <div className="col-span-12 md:col-span-4 bg-white rounded-lg shadow-md">
-        <WebSocketComponent />
-      </div> */}
+      </div>
     </div>
   );
 }

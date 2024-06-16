@@ -4,10 +4,11 @@ import TokenExpired from './TokenExpired';
 // import { useState, useEffect } from 'react';
 
 const TokenExpiredModalWrapper = async () => {
-  let result = await checkTokenExpiration();
-  
-  console.log("this is executing on server side everytime i switch routes");
-  return <TokenExpired initialIsTokenExpired={result} />;
+  const { isAuth, isValid, closeToExpire } = await checkTokenExpiration();
+
+  return <TokenExpired 
+  isAuth={isAuth} isValid={isValid} closeToExpire={closeToExpire} 
+  />;
 };
 
 export default TokenExpiredModalWrapper;

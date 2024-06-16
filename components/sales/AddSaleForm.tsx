@@ -4,6 +4,10 @@ import { getProducts } from '@/lib/product/product.service'; // Asumiendo que ti
 import { PlusCircleIcon } from '@heroicons/react/24/outline';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import useProductStock from '@/hooks/useProductStock';
+import { initializeNewProductSale, mapProductDtoToSimpleProductDto, setProductToNewProductSale } from '@/lib/mappers/productMapper';
+import { createdSale, handleDeleteProductSale, handleProductSaleChange } from '@/lib/mappers/saleMapper';
+import { handleFocus, handleInputChange } from '@/utils/formUtils';
+// import { handleFocus } from '@/utils/formUtils';
 
 interface AddSaleFormProps {
   onSubmit: (sale: SaleDto) => void;
@@ -11,17 +15,8 @@ interface AddSaleFormProps {
 }
 
 const AddSaleForm: React.FC<AddSaleFormProps> = ({ onSubmit, onClose }) => {
-  const initialProdSaleObject = {
-    id: 0,
-    product: { id: 0, name: '', category: { id: 0, name: '' }, tester: false, availableQuantity: 0 },
-    testerProduct: null,
-    totalQuantity: 0,
-    registerQuantity: 0,
-    counterQuantity: 0
-  }
-  // const initialProductSale: ProductSaleDto[] = [prodObject];
-  // const [productSales, setProductSales] = useState<ProductSaleDto[]>(initialProductSale);
-  // const [products, setProducts] = useState<ProductSimpleDto[]>([]);
+  const initialProdSaleObject = initializeNewProductSale();
+  
   const initialProducts: ProductSimpleDto[] = [];
   const { products, setProducts, productSales, setProductSales } = useProductStock(initialProducts, [initialProdSaleObject]);
   const [productSelections, setProductSelections] = useState<{ [index: number | string]: string }>({});
@@ -36,27 +31,26 @@ const AddSaleForm: React.FC<AddSaleFormProps> = ({ onSubmit, onClose }) => {
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
+  const handleInputChangeForUserName = (e: React.ChangeEvent<HTMLInputElement>) =>
+    handleInputChange<string>(e, 'userName', setUserName, validateField);
+  
+  const handleInputChangeForUserPhoneNumber = (e: React.ChangeEvent<HTMLInputElement>) =>
+    handleInputChange<string>(e, 'userPhoneNumber', setUserPhoneNumber, validateField);
+  
+  const handleInputChangeForUserPayment = (e: React.ChangeEvent<HTMLInputElement>) =>
+    handleInputChange<number>(e, 'userPayment', setUserPayment, validateField);
+  
+  const handleInputChangeForTotalPrice = (e: React.ChangeEvent<HTMLInputElement>) =>
+    handleInputChange<number>(e, 'totalPrice', setTotalPrice, validateField);
+  
+  const handleInputChangeForTotalChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    handleInputChange<number>(e, 'totalChange', setTotalChange, validateField);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const productsResponse = await getProducts();
-
-        // console.log("Products response")
-        // console.log(productsResponse)
-        // console.log("Products response end")
-        const responseMappedToDto: ProductSimpleDto[] = productsResponse.map(prod => ({
-          id: prod.id || 0,
-          name: prod.name,
-          category: {
-            id: prod.category?.id || 0,
-            name: prod.category?.name
-          },
-          tester: prod.tester,
-          availableQuantity: prod.availableQuantity
-        }));
-
-        // console.log("MappedResponse")
-        // console.log(responseMappedToDto)
+        const responseMappedToDto: ProductSimpleDto[] = mapProductDtoToSimpleProductDto(productsResponse);
         setProducts(responseMappedToDto);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -77,12 +71,11 @@ const AddSaleForm: React.FC<AddSaleFormProps> = ({ onSubmit, onClose }) => {
     };
 
     validateForm();
-    console.log(isFormValid)
   }, [userName, userPhoneNumber, userPayment, totalPrice, totalChange, productSales, testerSale]);
 
-  const validateField = (field: string, value: any) => {
+  const validateField = (field: string, value: any, index?: number) => {
     let error = '';
-
+  
     if (field === 'userName' && !value.trim()) {
       error = 'El nombre del cliente es obligatorio.';
     } else if (field === 'userPhoneNumber' && !value.trim()) {
@@ -93,41 +86,54 @@ const AddSaleForm: React.FC<AddSaleFormProps> = ({ onSubmit, onClose }) => {
       error = 'El precio total debe ser un número válido mayor que cero.';
     } else if (field === 'totalChange' && isNaN(value)) {
       error = 'El cambio debe ser un número válido.';
-    } else if ((field === 'registerQuantity' || field === 'counterQuantity') && isNaN(value)) {
-      error = 'Debe ser un número válido.';
-    }
-
-    setErrors(prevErrors => ({
-      ...prevErrors,
-      [field]: error,
-    }));
-  };
-
-
-  const handleAddProductSale = () => {
-    const newProductSale: ProductSaleDto = {
-      id: 0,
-      product: {
-        id: 0,
-        name: '',
-        category: { id: 0, name: '' },
-        tester: false
-      },
-      testerProduct: null,
-      totalQuantity: 0,
-      registerQuantity: 0,
-      counterQuantity: 0
-    };
-
-    const productName = productSelections[productSales.length];
-    if (productName) {
-      const selectedProduct = products.find((p) => p.name === productName) || null;
-      if (selectedProduct) {
-        newProductSale.product = { ...selectedProduct };
+    } else if (field === 'registerQuantity' || field === 'counterQuantity') {
+      if (isNaN(value)) {
+        error = 'Debe ser un número válido.';
+      } else if (index !== undefined) {
+        const productSale = productSales[index];
+        const registerQuantity = field === 'registerQuantity' ? value : productSale.registerQuantity;
+        const counterQuantity = field === 'counterQuantity' ? value : productSale.counterQuantity;
+        const totalQuantity = registerQuantity + counterQuantity;
+  
+        if (productSale.product.availableQuantity !== undefined && productSale.product.availableRegisterQuantity !== undefined && productSale.product.availableCounterQuantity !== undefined) {
+          if (totalQuantity > productSale.product.availableQuantity) {
+            error = `La cantidad total no puede exceder la cantidad disponible (${productSale.product.availableQuantity}).`;
+          } else if (field === 'registerQuantity' && registerQuantity > productSale.product.availableRegisterQuantity) {
+            error = `La cantidad de caja no puede exceder la cantidad disponible (${productSale.product.availableRegisterQuantity}).`;
+          } else if (field === 'counterQuantity' && counterQuantity > productSale.product.availableCounterQuantity) {
+            error = `La cantidad de mostrador no puede exceder la cantidad disponible (${productSale.product.availableCounterQuantity}).`;
+          }
+        }
       }
     }
+  
+    if (field === 'registerQuantity' || field === 'counterQuantity') {
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        [field + '-' + index]: error,
+      }));
+    } else {
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        [field]: error,
+      }));
+    }
+  };
+  
 
-    setProductSales([...productSales, newProductSale]);
+  const handleAddProductSale = () => {
+    const newProductSale: ProductSaleDto = initializeNewProductSale();
+
+    const productName = productSelections[productSales.length];
+    // if (productName) {
+    //   const selectedProduct = products.find((p) => p.name === productName) || null;
+    //   if (selectedProduct) {
+    //     newProductSale.product = { ...selectedProduct };
+    //   }
+    // }
+    const updatedProductSale = setProductToNewProductSale(productName, newProductSale, products);
+
+    setProductSales([...productSales, updatedProductSale]);
     setProductSelections({ ...productSelections, [productSales.length]: '' });
   };
 
@@ -135,81 +141,29 @@ const AddSaleForm: React.FC<AddSaleFormProps> = ({ onSubmit, onClose }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const totalSoldProducts = productSales.reduce((sum, ps) => sum + ps.registerQuantity + ps.counterQuantity, 0);
-
-    // const saleDto: SaleDto = { id: 0, productSales, totalProducts: productSales.length, totalSoldProducts }
-    const saleDto: SaleDto = {
-      id: 0,
-      productSales,
-      totalProducts: productSales.length,
-      totalSoldProducts,
-      userName,
-      userPhoneNumber,
-      userPayment,
-      totalPrice,
-      totalChange,
-      testerSale
-    };
-
+  
+    const saleDto = createdSale(productSales, totalSoldProducts, userName,
+      userPhoneNumber, userPayment, totalPrice, totalChange, testerSale);
+  
     onSubmit(saleDto);
     onClose();
   };
 
-  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    if (e.target.value === "0") {
-      e.target.value = '';
-    } else if (isNaN(parseInt(e.target.value))) {
-      e.target.value = '';
-    }
-  };
-
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>, index: number, field: keyof ProductSaleDto) => {
     const value = isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value);
-    handleProductSaleChange(index, field, value);
-    validateField(field, value);
+    handleProductSaleChangeWrapper(index, field, value);
+    validateField(field, value, index);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
-    const value = e.target.value;
-    if (field === 'userPayment' || field === 'totalPrice' || field === 'totalChange') {
-      const numericValue = parseInt(value);
-      if (!isNaN(numericValue)) {
-        field === 'userPayment' ? setUserPayment(numericValue) : field === 'totalPrice' ? setTotalPrice(numericValue) : setTotalChange(numericValue);
-      }
-    } else {
-      field === 'userName' ? setUserName(value) : setUserPhoneNumber(value);
-    }
-    validateField(field, value);
-  };
-
-  const handleProductSaleChange = (index: number, field: keyof ProductSaleDto, value: any) => {
-    const updatedProductSales = productSales.map((ps, i) =>
-      i === index ? {
-        ...ps,
-        [field]: value,
-        totalQuantity: (field === 'registerQuantity' || field === 'counterQuantity')
-          ? ps.registerQuantity + (field === 'registerQuantity' ? value : ps.registerQuantity) + (field === 'counterQuantity' ? value : ps.counterQuantity)
-          : ps.totalQuantity
-      } : ps
-    );
+  const handleProductSaleChangeWrapper = (index: number, field: keyof ProductSaleDto, value: any) => {
+    const updatedProductSales = handleProductSaleChange(productSales, index, field, value);
     setProductSales(updatedProductSales);
   };
 
-  const handleDeleteProductSale = (index: any) => {
-    console.log("Index: " + index)
-    setProductSales(prevProductSales => prevProductSales.filter((_, i) => i !== index));
-    // setProductSelections({ ...productSelections, [index]: '' });
-    setProductSelections(prevProductSelections => {
-      const updatedSelections: { [index: number | string]: string } = {};
-      Object.keys(prevProductSelections).forEach((prevIndex: string) => {
-        const parsedPrevIndex = parseInt(prevIndex);
-        if (parsedPrevIndex < index) {
-          updatedSelections[parsedPrevIndex] = prevProductSelections[parsedPrevIndex];
-        } else if (parsedPrevIndex > index) {
-          updatedSelections[parsedPrevIndex - 1] = prevProductSelections[parsedPrevIndex];
-        }
-      });
-      return updatedSelections;
-    });
+  const handleDeleteProductSaleWrapper = (index: any) => {
+    const { updatedProductSales, updatedProductSelections } = handleDeleteProductSale(productSales, productSelections, index);
+    setProductSales(updatedProductSales);
+    setProductSelections(updatedProductSelections);
   }
 
   const filterProductsByTester = (value: any) => {
@@ -218,6 +172,7 @@ const AddSaleForm: React.FC<AddSaleFormProps> = ({ onSubmit, onClose }) => {
       .map(prod => prod.name)
   }
 
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
       <div className="bg-white rounded-lg shadow-md w-full max-w-md max-h-[80vh] overflow-y-auto p-6">
@@ -225,7 +180,8 @@ const AddSaleForm: React.FC<AddSaleFormProps> = ({ onSubmit, onClose }) => {
           <Input
             id="userName"
             value={testerSale ? 'IPHONE HOUSE' : userName}
-            onChange={(e) => handleInputChange(e, 'userName')}
+            // onChange={(e) => handleInputChange(e, 'userName')}
+            onChange={handleInputChangeForUserName}
             placeholder="Ingrese el nombre del cliente"
             type="text"
             label="Nombre del Cliente"
@@ -237,7 +193,8 @@ const AddSaleForm: React.FC<AddSaleFormProps> = ({ onSubmit, onClose }) => {
             id="userPhoneNumber"
             value={userPhoneNumber}
             onFocus={handleFocus}
-            onChange={(e) => handleInputChange(e, 'userPhoneNumber')}
+            // onChange={(e) => handleInputChange(e, 'userPhoneNumber')}
+            onChange={handleInputChangeForUserPhoneNumber}
             placeholder="Ingrese el número de teléfono del cliente"
             type="text"
             label="Número de Teléfono"
@@ -249,7 +206,8 @@ const AddSaleForm: React.FC<AddSaleFormProps> = ({ onSubmit, onClose }) => {
             id="userPayment"
             value={isNaN(userPayment) ? '' : userPayment.toString()}
             onFocus={handleFocus}
-            onChange={(e) => handleInputChange(e, 'userPayment')}
+            // onChange={(e) => handleInputChange(e, 'userPayment')}
+            onChange={handleInputChangeForUserPayment}
             placeholder="Ingrese el pago del usuario"
             type="text"
             label="Pago del Usuario"
@@ -261,7 +219,8 @@ const AddSaleForm: React.FC<AddSaleFormProps> = ({ onSubmit, onClose }) => {
             id="totalPrice"
             value={isNaN(totalPrice) ? '' : totalPrice.toString()}
             onFocus={handleFocus}
-            onChange={(e) => handleInputChange(e, 'totalPrice')}
+            // onChange={(e) => handleInputChange(e, 'totalPrice')}
+            onChange={handleInputChangeForTotalPrice}
             placeholder="Ingrese el precio total"
             type="text"
             label="Precio Total"
@@ -273,7 +232,8 @@ const AddSaleForm: React.FC<AddSaleFormProps> = ({ onSubmit, onClose }) => {
             id="totalChange"
             value={isNaN(totalChange) ? '' : totalChange.toString()}
             onFocus={handleFocus}
-            onChange={(e) => handleInputChange(e, 'totalChange')}
+            // onChange={(e) => handleInputChange(e, 'totalChange')}
+            onChange={handleInputChangeForTotalChange}
             placeholder="Ingrese el cambio total"
             type="text"
             label="Cambio Total"
@@ -297,19 +257,15 @@ const AddSaleForm: React.FC<AddSaleFormProps> = ({ onSubmit, onClose }) => {
                   setProductSelections({ ...productSelections, [index]: e.target.value });
                   const selectedProductName = e.target.value;
                   const selectedProduct = products.find((p) => p.name === selectedProductName) || null;
-                  console.log(selectedProduct)
-                  handleProductSaleChange(index, 'product', { ...selectedProduct, name: e.target.value });
+                  handleProductSaleChangeWrapper(index, 'product', { ...selectedProduct, name: e.target.value });
                 }}
                 placeholder="Producto"
                 type="select"
-                label={`${testerSale ? 'Desde' : 'Seleccione un Producto'}`}
+                label={`${testerSale ? 'Desde' : 'Seleccione un Producto: '} (Disponibles: ${productSale.product.availableQuantity})`}
                 required
                 fields={filterProductsByTester(false)}
                 error={errors[`saleProduct-${index}`]}
               />
-              <label className='block font-semibold mb-2'>
-                Cantidad Disponible: {productSale.product.availableQuantity}
-              </label>
               {testerSale && (
                 <Input
                   id={`testerProduct-${index}`}
@@ -318,7 +274,7 @@ const AddSaleForm: React.FC<AddSaleFormProps> = ({ onSubmit, onClose }) => {
                     const testerProductName = e.target.value;
                     const testerProduct = products.find((p) => p.name === testerProductName) || null;
                     setProductSelections({ ...productSelections, [`tester-${index}`]: e.target.value });
-                    handleProductSaleChange(index, 'testerProduct', testerProduct);
+                    handleProductSaleChangeWrapper(index, 'testerProduct', testerProduct);
                   }}
                   placeholder="Producto de Destino"
                   type="select"
@@ -335,7 +291,7 @@ const AddSaleForm: React.FC<AddSaleFormProps> = ({ onSubmit, onClose }) => {
                 onChange={(e) => handleOnChange(e, index, 'registerQuantity')}
                 placeholder="Cantidad en Caja"
                 type="text"
-                label="Cantidad de Caja"
+                label={`Cantidad de Caja: (Disponibles: ${productSale.product.availableRegisterQuantity})`}
                 error={errors[`registerQuantity-${index}`]}
               />
               <Input
@@ -345,13 +301,13 @@ const AddSaleForm: React.FC<AddSaleFormProps> = ({ onSubmit, onClose }) => {
                 onChange={(e) => handleOnChange(e, index, 'counterQuantity')}
                 placeholder="Cantidad en Mostrador"
                 type="text"
-                label="Cantidad de Mostrador"
+                label={`Cantidad de mostrador: (Disponibles: ${productSale.product.availableCounterQuantity})`}
                 error={errors[`counterQuantity-${index}`]}
               />
               <div className="flex justify-end">
                 <button
                   type="button"
-                  onClick={(e) => handleDeleteProductSale(index)}
+                  onClick={(e) => handleDeleteProductSaleWrapper(index)}
                   className={`${productSales.length <= 1 ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-700'} text-white 
         font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2`}
                   disabled={productSales.length <= 1}

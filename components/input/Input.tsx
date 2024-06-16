@@ -33,10 +33,26 @@ const Input = <T extends string | number>({
     setLocalError(error || '');
   }, [error]);
 
+  // const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  //   if (onChange !== undefined) {
+  //     const sanitizedValue = type === 'email' || type === 'password' ? e.target.value.replace(/\s+/g, '') : e.target.value; // Eliminar espacios solo si es tipo email
+  //     onChange({ ...e, target: { ...e.target, value: sanitizedValue } });
+  //   }
+  // };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     if (onChange !== undefined) {
-      const sanitizedValue = type === 'email' || type === 'password' ? e.target.value.replace(/\s+/g, '') : e.target.value; // Eliminar espacios solo si es tipo email
-      onChange({ ...e, target: { ...e.target, value: sanitizedValue } });
+      const sanitizedValue = (type === 'email' || type === 'password') ? e.target.value.replace(/\s+/g, '') : e.target.value;
+      // Aseguramos que el id y value sean correctos
+      const eventWithSanitizedValue = {
+        ...e,
+        target: {
+          ...e.target,
+          id: e.target.id,
+          value: sanitizedValue,
+        },
+      };
+      
+      onChange(eventWithSanitizedValue);
     }
   };
 

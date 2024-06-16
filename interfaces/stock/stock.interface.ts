@@ -22,4 +22,6 @@ interface ProductSimpleDto {
   category: CategoryDto;
   tester: boolean;
   availableQuantity?: number;
+  availableRegisterQuantity?: number;
+  availableCounterQuantity?: number;
 }

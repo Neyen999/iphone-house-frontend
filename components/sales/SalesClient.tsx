@@ -45,20 +45,14 @@ const SalesClient = ({ initialSales }: { initialSales: Page<SaleDto> }) => {
         endDate ? endDate.toDate() : null);
       setSales(salesData.content);
       setTotalPages(salesData.totalPages);
-      console.log(salesData)
-      console.log("Inside here")
     } catch (error) {
-      console.error('Error fetching sales:', error);
       setLoading(false);
     }
   };
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
-    console.log("value: " + value)
-    console.log("Here")
     setInitialLoad(false);
     setPage(value - 1);
-    console.log(page)
   };
 
   const handlePageSizeChange = (event: SelectChangeEvent<unknown>) => {
@@ -92,12 +86,9 @@ const SalesClient = ({ initialSales }: { initialSales: Page<SaleDto> }) => {
     try {
       const savedSale = await saveSale(formData);
       setSales([...sales, savedSale]);
-      console.log("SUBMIT")
-      console.log(formData)
       setShowAddSalePopup(false);
       await fetchSales()
     } catch (error) {
-      console.error('Error saving sale:', error);
     }
   };
 
@@ -109,12 +100,12 @@ const SalesClient = ({ initialSales }: { initialSales: Page<SaleDto> }) => {
 
   return (
     <div className='mx-auto bg-gray-100 p-4 rounded-lg shadow-md h-full'>
-      <div className={clsx("flex mb-4", { 'justify-center items-center h-full': sales.length === 0 && initialLoad, 'justify-around': sales.length > 0 })}>
+      <div className="flex mb-4">
         {loading ? (
           <p>Cargando...</p>
         ) : (
           <div className="relative flex-grow">
-            <div className={`flex mb-4 gap-2 ${sales.length === 0 && initialLoad ? 'justify-center' : ''}`}>
+            <div className="flex mb-4 gap-2">
               <TextField
                 label="Buscar"
                 variant="outlined"
@@ -122,7 +113,7 @@ const SalesClient = ({ initialSales }: { initialSales: Page<SaleDto> }) => {
                 onChange={handleSearchChange}
                 fullWidth
                 sx={{ backgroundColor: 'white', borderRadius: 2, width: '20%', maxWidth: 500, 
-                  display: `${initialLoad && sales.length === 0 ? 'none' : 'block'}` 
+                  display: 'block' 
                 }}
 
               />
@@ -160,7 +151,7 @@ const SalesClient = ({ initialSales }: { initialSales: Page<SaleDto> }) => {
               </Button>
             </div>
             <div className='flex-col'>
-              <div className={`flex ${sales.length === 0 && initialLoad ? 'justify-center' : 'justify-start'}`}>
+              <div className="flex justify-start">
                 <button
                   className="bg-blue-500 text-white font-semibold py-2 px-2 rounded flex items-center justify-left"
                   onClick={handleAddSaleClick}

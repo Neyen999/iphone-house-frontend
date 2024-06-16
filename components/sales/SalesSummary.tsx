@@ -12,10 +12,15 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({ startDate, endDate }) => {
   const [totalRevenue, setTotalRevenue] = useState<number>(0);
   const [totalChange, setTotalChange] = useState<number>(0);
 
+
   useEffect(() => {
     const fetchSales = async () => {
       try {
-        const response = await getSales(0, 100000, '', startDate, endDate != null ? endDate : dayjs().toDate());
+        const response = await getSales(0, 100000, '', 
+        // startDate != null ? startDate : dayjs().toDate(), 
+        startDate,
+        endDate != null ? endDate : dayjs().toDate());
+        
         setSales(response.content);
       } catch (error) {
         console.error('Error fetching sales:', error);

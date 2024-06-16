@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Box, Button, TextField } from '@mui/material';
+import { Modal, Box, Button, Alert } from '@mui/material';
+import Input from '../input/Input';
+import { handleFocus, handleInputChange } from '@/utils/formUtils';
 
 interface EditStockModalProps {
   open: boolean;
@@ -10,54 +12,98 @@ interface EditStockModalProps {
 
 const EditStockModal: React.FC<EditStockModalProps> = ({ open, onClose, stock, onSave }) => {
   const [formValues, setFormValues] = useState(stock);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [registerReposition, setRegisterReposition] = useState<number>(stock?.registerReposition || 0);
+  const [counterReposition, setCounterReposition] = useState<number>(stock?.counterReposition || 0);
+  const [initialRegisterStock, setInitialRegisterStock] = useState<number>(stock?.initialRegisterStock || 0);
+  const [initialCounterStock, setInitialCounterStock] = useState<number>(stock?.initialCounterStock || 0);
+  const [finalStock, setFinalStock] = useState<number>(stock?.finalStock || 0);
+
+  const [isFormValid, setIsFormValid] = useState<boolean>(false);
+  const [isFormChanged, setIsFormChanged] = useState<boolean>(false);
+
+  const handleInputChangeForRegisterReposition = (e: React.ChangeEvent<HTMLInputElement>) =>
+    handleInputChange<number>(e, 'registerReposition', setRegisterReposition, validateField);
+
+  const handleInputChangeForCounterReposition = (e: React.ChangeEvent<HTMLInputElement>) =>
+    handleInputChange<number>(e, 'counterReposition', setCounterReposition, validateField);
+
+  const handleInputChangeForInitialRegisterStock = (e: React.ChangeEvent<HTMLInputElement>) =>
+    handleInputChange<number>(e, 'initialRegisterStock', setInitialRegisterStock, validateField);
+
+  const handleInputChangeForInitialCounterStock = (e: React.ChangeEvent<HTMLInputElement>) =>
+    handleInputChange<number>(e, 'initialCounterStock', setInitialCounterStock, validateField);
+
+  const handleInputChangeForFinalStock = (e: React.ChangeEvent<HTMLInputElement>) =>
+    handleInputChange<number>(e, 'finalStock', setFinalStock, validateField);
 
   useEffect(() => {
-    if (stock) {
-      setFormValues(stock);
+    const validateForm = () => {
+      const newErrors: { [key: string]: string } = {};
+      let isValid = true;
+
+      const fields = [
+        { id: 'registerReposition', value: registerReposition },
+        { id: 'counterReposition', value: counterReposition },
+        { id: 'initialRegisterStock', value: initialRegisterStock },
+        { id: 'initialCounterStock', value: initialCounterStock },
+        { id: 'finalStock', value: finalStock },
+      ];
+
+      fields.forEach(field => {
+        const error = validateField(field.id, field.value);
+        if (error) {
+          newErrors[field.id] = error;
+          isValid = false;
+        }
+      });
+
+      setErrors(newErrors);
+      setIsFormValid(isValid);
+    };
+
+    validateForm();
+
+    const hasFormChanged = () => {
+      if (!stock) return false;
+      return (
+        registerReposition !== stock.registerReposition ||
+        counterReposition !== stock.counterReposition ||
+        initialRegisterStock !== stock.initialRegisterStock ||
+        initialCounterStock !== stock.initialCounterStock || 
+        (finalStock !== 0  && finalStock !== stock.finalStock)
+      );
+    };
+
+    setIsFormChanged(hasFormChanged());
+  }, [registerReposition, counterReposition, initialRegisterStock, initialCounterStock, finalStock]);
+
+  const validateField = (id: string, value: any) => {
+    let error = '';
+
+    if (value === '' || value === null || isNaN(value) || value < 0) {
+      error = 'El valor debe ser un número válido mayor o igual a 0';
     }
-  }, [stock]);
 
-  // useEffect(() => {
-  //   if (formValues) {
-  //     const { initialRegisterStock, initialCounterStock } = formValues;
-  //     const initialStock = (initialRegisterStock || 0) + (initialCounterStock || 0);
-  //     console.log("Stock inicial de caja: " + initialRegisterStock)
-  //     console.log("Stock inicial de mostrador: " + initialCounterStock)
-  //     const updatedFormValues: StockDto = {
-  //       ...formValues,
-  //       initialStock: initialStock, // Aquí estás convirtiendo a cadena de texto
-  //       id: formValues.id,
-  //     };
-  //     setFormValues(updatedFormValues);
-  //     console.log("Stock inicial: " + formValues.initialStock)
-  //   }
-  // }, [formValues?.initialStock, formValues?.initialRegisterStock, formValues?.initialCounterStock]);
-  
-  
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [id]: error,
+    }));
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormValues((prev) => {
-      if (prev) {
-        const updatedValues = { ...prev, [name]: parseFloat(value) || 0 };
-        // Calcular el nuevo valor del Stock Inicial
-        const initialRegisterStock = updatedValues.initialRegisterStock || 0;
-        const initialCounterStock = updatedValues.initialCounterStock || 0;
-        const newInitialStock = initialRegisterStock + initialCounterStock;
-        // Actualizar el campo "Stock Inicial" en formValues
-        console.log("Nuevo stock inicial: " + newInitialStock);
-        return { ...updatedValues, initialStock: newInitialStock };
-      }
-      return prev;
-    });
+    return error;
   };
-  
+
   const handleSubmit = () => {
+    if (!isFormValid) {
+      return;
+    }
+
     onSave(formValues);
     onClose();
   };
 
   if (!formValues) return null;
+
   const modalStyle = {
     position: 'absolute',
     top: '50%',
@@ -73,100 +119,122 @@ const EditStockModal: React.FC<EditStockModalProps> = ({ open, onClose, stock, o
     gap: 2,
     borderRadius: '8px',
     maxHeight: '80%',
-    overflowY: 'scroll'
+    overflowY: 'scroll',
   };
-
-  const inputStyle = {
-    '&:focus': {
-      outline: 'none !important', // Anula el estilo de resaltado azul
-      borderColor: 'transparent !important', // También puedes anular el color del borde
-      boxShadow: 'none !important', // Anula cualquier sombra de enfoque
-    },
-  };
-  
 
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={{ ...modalStyle }}>
-        <h2>Editar Stock</h2>
-        <TextField
-          label="Reposición Caja"
-          name="registerReposition"
-          value={formValues.registerReposition || 0}
-          onChange={handleChange}
-          fullWidth
-          variant='outlined'
-          sx={inputStyle}
-  
+        <Input
+          id="registerReposition"
+          value={registerReposition}
+          onChange={handleInputChangeForRegisterReposition}
+          onFocus={handleFocus}
+          placeholder='Ingrese un número'
+          type='text'
+          label='Reposición de Caja'
+          required
+          error={errors.registerReposition}
         />
-        <TextField
-          label="Reposición Mostrador"
-          name="counterReposition"
-          value={formValues.counterReposition || 0}
-          onChange={handleChange}
-          fullWidth
+        <Input
+          id="counterReposition"
+          value={counterReposition}
+          onChange={handleInputChangeForCounterReposition}
+          onFocus={handleFocus}
+          placeholder='Ingrese un número'
+          type='text'
+          label='Reposición Mostrador'
+          required
+          error={errors.counterReposition}
         />
-        <TextField
-          label="Stock Inicial Caja"
-          name="initialRegisterStock"
-          value={formValues.initialRegisterStock || 0}
-          onChange={handleChange}
-          fullWidth
+        <Input
+          id="initialRegisterStock"
+          value={initialRegisterStock}
+          onChange={handleInputChangeForInitialRegisterStock}
+          onFocus={handleFocus}
+          placeholder='Ingrese un número'
+          type='text'
+          label='Stock Inicial Caja'
+          required
+          error={errors.initialRegisterStock}
         />
-        <TextField
-          label="Stock Inicial Mostrador"
-          name="initialCounterStock"
-          value={formValues.initialCounterStock || 0}
-          onChange={handleChange}
-          fullWidth
+        <Input
+          id="initialCounterStock"
+          value={initialCounterStock}
+          onChange={handleInputChangeForInitialCounterStock}
+          onFocus={handleFocus}
+          placeholder='Ingrese un número'
+          type='text'
+          label='Stock Inicial Mostrador'
+          required
+          error={errors.initialCounterStock}
         />
-        <TextField
-          label="Stock Ideal"
-          name="idealStock"
+        <Input
+          id="finalStock"
+          value={finalStock}
+          onChange={handleInputChangeForFinalStock}
+          onFocus={handleFocus}
+          placeholder='Ingrese un número'
+          type='text'
+          label='Stock Final'
+          required
+        />
+        <Input
+          id="idealStock"
           value={formValues.idealStock}
           disabled
-          fullWidth
+          placeholder='Ingrese un número'
+          type='text'
+          label='Stock Ideal'
+          required
         />
-        <TextField
-          label="Stock Inicial"
-          name="initialStock"
+        <Input
+          id="initialStock"
           value={formValues.initialStock}
           disabled
-          fullWidth
+          placeholder='Ingrese un número'
+          type='text'
+          label='Stock Inicial'
+          required
         />
-        <TextField
-          label="Stock Final"
-          name="finalStock"
-          value={formValues.finalStock}
-          disabled
-          fullWidth
-        />
-        <TextField
-          label="Tester"
-          name="tester"
+        <Input
+          id="tester"
           value={formValues.tester ? 'Sí' : 'No'}
           disabled
-          fullWidth
+          placeholder='Ingrese un número'
+          type='text'
+          label='Tester'
+          required
         />
-        <TextField
-          label="Producto"
-          name="product.name"
+        <Input
+          id="product.name"
           value={formValues.product.name}
           disabled
-          fullWidth
+          placeholder='Ingrese un número'
+          type='text'
+          label='Producto'
+          required
         />
-        <TextField
-          label="Categoría"
-          name="product.category.name"
+        <Input
+          id="product.category.name"
           value={formValues.product.category.name}
           disabled
-          fullWidth
+          placeholder='Ingrese un número'
+          type='text'
+          label='Categoría'
+          required
         />
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-          <Button onClick={onClose}>Cancelar</Button>
-          <Button onClick={handleSubmit} color="primary" variant="contained" sx={{ ml: 2 }}>
-            Editar
-          </Button>
+          <button
+            type="submit"
+            onClick={handleSubmit}
+            className={`${!isFormValid || !isFormChanged ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-700'} text-white 
+              font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2`}
+              disabled={!isFormValid || !isFormChanged}
+          >
+            Editar stock
+          </button>
+          <button type="button" onClick={onClose} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Cancelar</button>
         </Box>
       </Box>
     </Modal>

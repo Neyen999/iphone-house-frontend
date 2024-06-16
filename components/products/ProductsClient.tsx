@@ -65,12 +65,10 @@ const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[] }) 
     // Aquí puedes manejar la lógica para agregar el producto a la lista de productos
     try {
       const savedProduct = await saveProduct(formData);
-      console.log('Nuevo producto:', formData);
 
       setProducts([...products, savedProduct]);
       setShowAddProductPopup(false)
     } catch (error) {
-      console.error('Error saving sale:', error);
     }
   };
 
@@ -78,7 +76,6 @@ const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[] }) 
     // Aquí puedes manejar la lógica para agregar el producto a la lista de productos
     try {
       const savedProducts = await saveProductAndTester(formData);
-      console.log('Nuevos productos:', savedProducts);
 
       setProducts((prevProducts) => [...prevProducts, ...savedProducts]);
       setShowAddProductPopup(false)
@@ -91,7 +88,6 @@ const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[] }) 
     try {
       // Llamada a la API para actualizar el producto (comentada)
       const updatedProduct = await editProduct(formData);
-      console.log('Producto editado:', updatedProduct);
   
       // Encuentra el índice del producto editado
       const updatedProducts = products.map((product) =>
@@ -110,16 +106,13 @@ const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[] }) 
 
   const handleDeleteProduct = async (item: any) => {
     try {
-      console.log(item);
       const deletedProducts = await deleteProduct(item.name);
-      console.log(deletedProducts);
   
       // Filtrar los productos eliminados del estado actual
       setProducts((prevProducts) => 
         prevProducts.filter((product) => !deletedProducts.some((deleted) => deleted.id === product.id))
       );
     } catch (error) {
-      console.error(`Error deleting product with name ${item.name}:`, error);
     }
   };
   
@@ -137,7 +130,6 @@ const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[] }) 
   const handleEditCategory = async (formData: any) => {
     try {
       const updatedCategory = await editCategory(formData.id, formData);
-      console.log('Categoría editada:', updatedCategory);
   
       const updatedCategories = categories.map((category) =>
         category.id === updatedCategory.id ? updatedCategory : category
@@ -145,7 +137,6 @@ const ProductsClient = ({ initialProducts }: { initialProducts: ProductDto[] }) 
   
       setCategories(updatedCategories);
     } catch (error) {
-      console.error('Error editando la categoría:', error);
     }
   };
 

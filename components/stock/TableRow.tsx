@@ -34,7 +34,6 @@ const TableRow = <TData extends object>({
   
   const handleDelete = (row: StockDto) => {
     // Lógica para eliminar la fila
-    console.log('Eliminar fila:', row);
   };
 
   const isNumeric = (value: any): boolean => {
@@ -45,10 +44,7 @@ const TableRow = <TData extends object>({
     <MUITableRow>
       {columns.map((column, index) => {
         const value = getValueByAccessorKey(row, column.accessorKey);
-        // console.log("El valor es: " + value)
         const isValueNumeric = isNumeric(value);
-
-        // console.log("Es numerico el valor: " + value + "? " + isValueNumeric)
 
         return(
         <TableCell
@@ -63,7 +59,6 @@ const TableRow = <TData extends object>({
           }
           `}
         >
-          {/* {`${column.accessorKey === 'actions' && console.log("Es actions")}`} */}
           {column.accessorKey === 'actions' ? (
             <ActionsCell
               row={row}

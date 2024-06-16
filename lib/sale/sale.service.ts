@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { obtainCookie } from '../auth/auth.server';
 
-const API_BASE_URL = 'http://localhost:8080/api/v1';
+// const API_BASE_URL = 'http://localhost:8080/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 
 // Crear una instancia de axios
 const axiosInstance = axios.create({
@@ -39,16 +41,15 @@ export const getSales = async (page?: (number | null),
                                search?: (string | null), 
                                startDate?: (Date | null), 
                                endDate?: (Date | null)): Promise<Page<SaleDto>> => {
-  // console.log(page, size, search, date)
   try {
     const formattedStartDate = startDate ? startDate.toISOString().split('T')[0] : null;
     const formattedEndDate = endDate ? endDate.toISOString().split('T')[0] : null;
+
     const response = await axiosInstance.get('/sale/sales', {
       params: { page, size, search, startDate: formattedStartDate, endDate: formattedEndDate }
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching sales:', error);
     throw error;
   }
 };

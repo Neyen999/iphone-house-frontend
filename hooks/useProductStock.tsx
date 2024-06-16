@@ -2,32 +2,32 @@ import { useState, useEffect } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
+const API_URL = process.env.NEXT_PUBLIC_WEBSOCKET;
+
 const useProductStock = (initialProducts: ProductSimpleDto[], initialProductSales: ProductSaleDto[]) => {
   const [products, setProducts] = useState(initialProducts);
-  const [productSales, setProductSales] = useState<ProductSaleDto[] | []>(initialProductSales);
+  const [productSales, setProductSales] = useState<ProductSaleDto[]>(initialProductSales);
 
   useEffect(() => {
-    const socket = new SockJS('http://localhost:8080/ws');
+    console.log("API URL: " + API_URL)
+    const socket = new SockJS(`${API_URL}/ws`);
     const stompClient = new Client({
       webSocketFactory: () => socket,
       debug: (str) => {
-        console.log(str);
       },
       onConnect: () => {
-        console.log('Connected');
         stompClient.subscribe('/topic/stock-updates', (message) => {
           const updatedStock = JSON.parse(message.body);
 
-          console.log("Inside the suscribe")
           // Actualiza el stock de los productos en tiempo real
           setProducts((prevProducts) =>
             prevProducts.map((product) =>
-              product.id === updatedStock.productId ? { ...product, availableQuantity: updatedStock.newStock } : product
+              product.id === updatedStock.productId ? { ...product, availableQuantity: updatedStock.newStock, availableRegisterQuantity: updatedStock.newRegisterStock, availableCounterQuantity: updatedStock.newCounterStock } : product
             )
           );
           setProductSales((prevProductSales) =>
             prevProductSales.map((productSale) =>
-              productSale.product.id === updatedStock.productId ? { ...productSale, product: { ...productSale.product, availableQuantity: updatedStock.newStock } } : productSale
+              productSale.product.id === updatedStock.productId ? { ...productSale, product: { ...productSale.product, availableQuantity: updatedStock.newStock, availableRegisterQuantity: updatedStock.newRegisterStock, availableCounterQuantity: updatedStock.newCounterStock } } : productSale
             )
           );
         });

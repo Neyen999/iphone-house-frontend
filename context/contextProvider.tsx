@@ -11,7 +11,7 @@ const ContextProvider = ({ children }: any) => {
   const [user, setUser] = useState<UserDTO | null>(null);
   const [isTokenExpired, setIsTokenExpired] = useState<boolean>(false);
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  // const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [editingStock, setEditingStock] = useState<StockDto | null>(null);
@@ -35,42 +35,35 @@ const ContextProvider = ({ children }: any) => {
 
 
   const updateUser = (newUser: UserDTO) => {
-    console.log("NEW USER VALUE: ", newUser);
     setUser(newUser);
   }
 
-
-  const handleModalClose = () => {
-    console.log("Handle modal close on context provider")
-    setIsModalOpen(false);
-    setIsLoggingOut(false);
-  };
-
   const handleLogout = async () => {
-    console.log("Handle logout on context provider")
     setIsLoggingOut(true);
     await logoutUser();
 
     // redirect
-    // handleModalClose();
+    // Redirigir usando router.push
     router.push("/login");
+    // Recargar la página después de la redirección
+    window.location.reload();
   }
 
   const contextValue: ContextValue = {
     user,
-    isTokenExpired,
+    // isTokenExpired,
     isLoggingOut,
-    isModalOpen,
+    // isModalOpen,
     isLoading,
     isLoggedIn,
     setIsTokenExpired,
     setIsLoggingOut,
-    setIsModalOpen,
+    // setIsModalOpen,
     setUser,
     setIsLoading,
     setIsLoggedIn,
     handleLogout,
-    handleModalClose,
+    // handleModalClose,
     checkTokenExpiration,
     editingStock,
     isEditingModalOpen, 

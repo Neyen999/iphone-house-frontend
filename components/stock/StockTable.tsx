@@ -2,7 +2,7 @@ import React from 'react';
 import TableHeader from './TableHeader';
 import TableRow from './TableRow';
 import { Box, Table, TableBody, TableContainer, Paper, TableHead, TableCell } from '@mui/material';
-import { TableColumn } from '@/app/types/TableColumn';
+import { TableColumn } from '@/types/TableColumn';
 
 interface StockTableProps {
   columns: TableColumn<StockDto>[];

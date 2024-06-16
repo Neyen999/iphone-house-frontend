@@ -17,7 +17,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
   const allCookies = cookies(); 
   const hasCookies = allCookies.get('__iphonehouse_varela__'); 
-  console.log("Has cookies: " + hasCookies)
   return (
     <html lang="en">
       <body className={inter.className}>

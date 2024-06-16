@@ -1,15 +1,18 @@
 import { isTokenValid } from '@/lib/auth/auth.server';
 import PerfilClient from '@/components/profile/PerfilClient';
+import { getUser } from '@/lib/auth/auth.service';
 
 const Perfil = async () => {
-  const isValidToken = await isTokenValid();
+  const { isValid } = await isTokenValid();
 
-  if (!isValidToken) {
+  if (!isValid) {
     return null;
   }
   
+  const user = await getUser();
+  
   return (
-    <PerfilClient />
+    <PerfilClient user={user} />
   )
 
 };

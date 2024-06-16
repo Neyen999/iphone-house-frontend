@@ -17,7 +17,6 @@ const RecentSales = ({ sales }: { sales: SaleDto[] }) => {
 
 
   const handleEditSaleClick = (sale: SaleDto) => {
-    console.log(sale);
     setSelectedSale(sale);
     setIsEditing(true);
   };
@@ -29,14 +28,12 @@ const RecentSales = ({ sales }: { sales: SaleDto[] }) => {
 
   const handleEditSubmit = (formData: any) => {
     // Implement your update logic here
-    console.log("Edit sale", formData);
     setIsEditing(false);
   };
 
   const handleDeleteConfirm = async () => {
     if (selectedSale) {
       // Implement your delete logic here
-      console.log("Delete sale", selectedSale);
       const deletedSale = await deleteSale(selectedSale.id);
       // Remove the sale from the state
       setSalesList(salesList.filter(sale => sale.id !== deletedSale.id));

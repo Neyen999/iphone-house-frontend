@@ -3,9 +3,9 @@ import StockClient from "@/components/stock/StockClient";
 import { isTokenValid } from "@/lib/auth/auth.server";
 
 const Stock = async () => {
-  const isValidToken = await isTokenValid()
+  const { isValid } = await isTokenValid()
 
-  if (!isValidToken) {
+  if (!isValid) {
     return null;
   }
 

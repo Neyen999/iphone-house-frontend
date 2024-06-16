@@ -9,4 +9,6 @@ interface ProductDto {
   tester: boolean;
   availableQuantity?: number;
   totalSold?: number;
+  availableRegisterQuantity?: number;
+  availableCounterQuantity?: number;
 }

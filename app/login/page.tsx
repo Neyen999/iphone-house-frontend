@@ -2,7 +2,9 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { saveUserRoleCookie, loginUser } from '@/lib/auth/auth.service';
+import {
+  //  saveUserRoleCookie, 
+  loginUser } from '@/lib/auth/auth.service';
 import { useAuth } from '@/context/context';
 import Input from '@/components/input/Input';
 
@@ -44,13 +46,10 @@ const Login = () => {
     try {
       await loginUser(request);
       setLoginStatus('success');
+      // await saveUserRoleCookie();
 
-      const savedUser = await saveUserRoleCookie();
-
-      setTimeout(() => {
-        setIsLoggedIn(true);
-        router.push('/');
-      }, 1000);
+      setIsLoggedIn(true);
+      router.push('/');
     } catch (error) {
       setLoginStatus('error');
       setError('Usuario o contraseña incorrectos.');

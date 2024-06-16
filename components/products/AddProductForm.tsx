@@ -48,10 +48,6 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ categories, onSubmit, o
       const testerFieldsAreFilled = testerProduct.category !== null
       && testerProduct.initialStock !== 0 && testerProduct.idealStock.trim() !== '';
 
-      console.log(testerProduct)
-
-      console.log("tester fields are filled: " + testerFieldsAreFilled)
-
       setIsFormValid(!tester ? fieldAreFilled : (fieldAreFilled && testerFieldsAreFilled  ))
     };
 
@@ -73,7 +69,6 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ categories, onSubmit, o
     });
 
     if (isTester) {
-      console.log("Dentro de es tester")
       setTesterProduct(updateState);
     } else {
       setProduct(updateState);
@@ -100,7 +95,6 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ categories, onSubmit, o
   const validateField = (field: string, value: any) => {
     let error = '';
     
-    console.log("value is: " + value)
     if (field === 'name' && !value) {
       error = 'El nombre del producto es obligatorio.';
     } else if (field === 'category' && !value) {
@@ -119,7 +113,6 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ categories, onSubmit, o
     const newErrors: { [key: string]: string } = {};
 
     if (!product.name) {
-      console.log("En product.name")
       newErrors.name = 'El nombre del producto es obligatorio.';
     }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { TableHead, TableRow, TableCell, colors } from '@mui/material';
-import { TableColumn } from '@/app/types/TableColumn';
+import { TableColumn } from '@/types/TableColumn';
 
 interface TableHeaderProps<TData> {
   columns: TableColumn<TData>[];

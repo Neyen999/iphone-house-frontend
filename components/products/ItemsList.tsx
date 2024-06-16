@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import SecondPhoto from "@/assets/photo2.jpg";
+import SecondPhoto from "@/assets/Default.jpg";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import EditItemForm from "./EditItemForm";
 import DeleteWarning from "./DeleteWarning";
 
 interface ItemsListProps {
   items: any[], // Cambia el nombre de products a items y permite cualquier tipo
-  title: string,
+  title?: string,
   cols: string,
   updatable?: boolean,
   onUpdate?: (data: any) => void;
@@ -69,11 +69,17 @@ const ItemsList = ({ items, title, cols, updatable, onUpdate, onDelete, fields }
                 </div>
               )}
             </div>
-            {item.category != null && <p className="text-gray-600">Categoría: {item.category.name}</p>}
-            {item.totalProducts != null && <p className="text-gray-600">Productos Totales: {item.totalProducts}</p>}
-            {item.totalSoldProducts != null && <p className="text-gray-600">Productos Totales Vendidos: {item.totalSoldProducts}</p>}
-            {item.availableQuantity != null && <p className="text-gray-600">Cantidad Disponible: {item.availableQuantity}</p>}
-            {item.totalSold != null && <p className="text-gray-600">Cantidad Vendida: {item.totalSold}</p>}
+            {updatable ? (
+              <>
+                {item.category != null && <p className="text-gray-600">Categoría: {item.category.name}</p>}
+                {item.totalProducts != null && <p className="text-gray-600">Productos Totales: {item.totalProducts}</p>}
+                {item.totalSoldProducts != null && <p className="text-gray-600">Productos Totales Vendidos: {item.totalSoldProducts}</p>}
+                {item.availableQuantity != null && <p className="text-gray-600">Cantidad Disponible: {item.availableQuantity}</p>}
+                {item.totalSold != null && <p className="text-gray-600">Cantidad Vendida: {item.totalSold}</p>}
+              </>
+            ) : (
+              item.totalSold != null && <p className="text-gray-600">Cantidad Vendida: {item.totalSold}</p>
+            )}
             {activeModal === item.id && (
               <EditItemForm
                 item={selectedItem}

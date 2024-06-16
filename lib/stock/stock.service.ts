@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { obtainCookie } from '../auth/auth.server';
 
-const API_BASE_URL = 'http://localhost:8080/api/v1';
+// const API_BASE_URL = 'http://localhost:8080/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 
 // Crear una instancia de axios
 const axiosInstance = axios.create({
@@ -22,23 +24,11 @@ axiosInstance.interceptors.request.use(async (config) => {
   return Promise.reject(error);
 });
 
-// // Método para guardar un producto
-// export const saveSto = async (product: ProductDto): Promise<ProductDto> => {
-//   try {
-//     const response = await axiosInstance.post('/product', product);
-//     return response.data;
-//   } catch (error) {
-//     console.error('Error saving product:', error);
-//     throw error;
-//   }
-// };
-
 // Método para obtener todos los productos
 export const getStocks = async (page?: number, 
                                 size?: number, 
                                 search?: (string | null), 
                                 date?: (Date | null)): Promise<Page<StockDto>> => {
-  console.log(page, size, search, date)
   try {
     const formattedDate = date ? date.toISOString().split('T')[0] : null;
     const response = await axiosInstance.get('/stock/stocks', {
@@ -50,17 +40,6 @@ export const getStocks = async (page?: number,
     throw error;
   }
 };
-
-// // Método para obtener un solo producto por ID
-// export const getProductById = async (id: string): Promise<ProductDto> => {
-//   try {
-//     const response = await axiosInstance.get(`/product/${id}`);
-//     return response.data;
-//   } catch (error) {
-//     console.error(`Error fetching product with id ${id}:`, error);
-//     throw error;
-//   }
-// };
 
 // Método para editar un producto
 export const editStock = async (id: string, stock: StockDto): Promise<StockDto> => {

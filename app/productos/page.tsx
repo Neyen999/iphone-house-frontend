@@ -3,9 +3,9 @@ import ProductsProvider from "@/components/server-components/products/ProductsPr
 import { isTokenValid } from "@/lib/auth/auth.server";
 
 const Products = async () => {
-  const isValidToken = await isTokenValid()
+  const { isValid } = await isTokenValid()
 
-  if (!isValidToken) {
+  if (!isValid) {
     return null;
   }
 

@@ -3,6 +3,8 @@
 import { cookies } from 'next/headers';
 import { jwtDecode } from "jwt-decode";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export const isAuthenticated = async () => {
   const token = cookies().get('__iphonehouse_varela__')?.value;
 
@@ -12,38 +14,39 @@ export const isAuthenticated = async () => {
 export const isTokenValid = async () => {
   const token = cookies().get('__iphonehouse_varela__')?.value;
 
-  let decoded = null
-  // console.log("VALOR DEL TOKEN: ", token)
-
-  if (token !== undefined && token !== "" && token !== null) {
-    // console.log("On invalid token")
-    decoded = jwtDecode(token);
+  if (token) {
+    const decoded = jwtDecode(token);
     const expiration = decoded.exp || 0;
-    const now = Date.now();
+    const nowInSeconds = Math.floor(Date.now() / 1000);
 
-    return now < (expiration * 1000);
+    const isValid = nowInSeconds < expiration;
+    const timeToExpire = expiration - nowInSeconds;
+    const closeToExpire = timeToExpire <= 900; // 180 segundos (3 minutos) para estar cerca de la expiración
+
+
+    return {
+      isValid,
+      closeToExpire,
+    };
+    // return now < (expiration * 1000);
   }
 
-  // console.log("Decoded JWT: ", decoded);
-
-  return false;
+  return {
+    isValid: false,
+    closeToExpire: false
+  };
 }
 
 export const createSessionToken = async (cookieName: string, data: any, expires: Date) => {
-  console.log("Cookie data: ", {
-    "name": cookieName,
-    "data": data
-  })
   cookies().set(cookieName, data, { expires, httpOnly: true});
 }
 
 export const deleteSessionToken = async (cookieName: string) => {
-  console.log("inside delete cookie for cookie name: ", cookieName);
   cookies().delete(cookieName);
 }
 
 export const checkBackendStatus = async () => {
-  const response = await fetch("http://localhost:8080/api/v1/auth/appStatus");
+  const response = await fetch(`${API_BASE_URL}/api/v1/auth/appStatus`);
   if (response.status !== 200) {
     // do something to show on the front end
   }
@@ -53,8 +56,12 @@ export const obtainCookie = async (cookieName: string) => {
   return cookies().get(cookieName)?.value;
 }
 
-export const checkTokenExpiration = async () => {
+export const checkTokenExpiration = async (): Promise<TokenExpirationStatus> => {
   const isAuth = await isAuthenticated();
-  const isValid = await isTokenValid();
-  return isAuth && !isValid;
+  const { isValid, closeToExpire } = await isTokenValid();
+  return {
+    isAuth,
+    isValid,
+    closeToExpire
+  };
 };

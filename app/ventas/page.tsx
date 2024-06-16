@@ -5,9 +5,9 @@ import SalesProvider from "@/components/server-components/sales/SalesProvider";
 import { isTokenValid } from "@/lib/auth/auth.server";
 
 const Sales = async () => {
-  const isValidToken = await isTokenValid()
+  const { isValid } = await isTokenValid()
 
-  if (!isValidToken) {
+  if (!isValid) {
     return null;
   }
 

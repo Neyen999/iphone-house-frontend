@@ -37,12 +37,9 @@ const EditItemForm = ({ item, fields, onClose, onSubmit }: EditItemFormProps) =>
   const resolveValue = (id: string, incomingValue: any) => {
     const fieldWithOptions = fields.filter((field) => field.options != null)[0];
     if (id === 'category') {
-      console.log("Here")
       const category = fieldWithOptions.options?.filter((prop) => prop.name === incomingValue)[0];
-      // console.log(category)
       return category;
     }
-    // console.log(typeof incomingValue)
     return incomingValue;
   }
 
